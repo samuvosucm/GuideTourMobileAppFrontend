@@ -2,12 +2,23 @@ import { CurrentRenderContext } from '@react-navigation/native'
 import SegmentedControl from "@react-native-segmented-control/segmented-control";
 import React, { useState } from 'react'
 import { SafeAreaView, StyleSheet, View, Text, TextInput, TouchableOpacity} from 'react-native'
+import { signUp } from "../../services/dataService";
 
 export default function LoginScreen({ navigation }) {
     const [form, setForm] = useState ({
+        username: '',
         email: '',
         password: ''
     })
+
+    const handleSignUp = async () => {
+        try {
+            const userData = { username: form.username, email: form.email, password: form.password };
+            const newUser = await signUp(userData); 
+        } catch (error) {
+            Alert.alert("Error", error.message);
+        }
+    }
 
     const [selectedIndex, setSelectedIndex] = useState(0);
     return(
@@ -29,6 +40,13 @@ export default function LoginScreen({ navigation }) {
                 />
                 </View>
                     <View style={styles.form}>
+                    <Text style={styles.inputLabel}>Username</Text>
+                    <TextInput 
+                        style={styles.inputControl}
+                        value={form.username}
+                        onChangeText={username => setForm({...form, username})}
+                    >
+                    </TextInput>
                     <Text style={styles.inputLabel}>Email</Text>
                     <TextInput 
                         style={styles.inputControl}
@@ -47,9 +65,9 @@ export default function LoginScreen({ navigation }) {
                 <TouchableOpacity
                     style={styles.button}
                     onPress={() => {
-
+                        handleSignUp()
                     }}>
-                    <Text style={styles.buttonText}>Sign in</Text>
+                    <Text style={styles.buttonText}>Sign up</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                     style={styles.formFooterButton}

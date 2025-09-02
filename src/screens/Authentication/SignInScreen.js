@@ -1,12 +1,23 @@
 import { CurrentRenderContext } from '@react-navigation/native'
 import React, { useState } from 'react'
 import { SafeAreaView, StyleSheet, View, Text, TextInput, TouchableOpacity} from 'react-native'
+import { signIn } from '../../services/dataService'
 
 export default function SignInScreen({ navigation }) {
     const [form, setForm] = useState ({
         email: '',
         password: ''
     })
+
+    const handleSignIn = async () => {
+        try {
+            const userData = { email: form.email, password: form.password };
+            const user = await signIn(userData); 
+        } catch (error) {
+            Alert.alert("Error", error.message);
+        }  
+    }
+
     return(
         <SafeAreaView style={{flex: 1, backgroundColor: '#dce3f0ff'}}>
             <View style={styles.container}>
@@ -33,7 +44,7 @@ export default function SignInScreen({ navigation }) {
                 <TouchableOpacity
                     style={styles.button}
                     onPress={() => {
-
+                        handleSignIn()
                     }}>
                     <Text style={styles.buttonText}>Sign in</Text>
                 </TouchableOpacity>
