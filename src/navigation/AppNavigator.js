@@ -5,6 +5,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 // Screens
 import SignInScreen from '../screens/Authentication/SignInScreen';
 import SignUpScreen from '../screens/Authentication/SignUpScreen';
+import ForgotPasswordScreen from '../screens/Authentication/ForgotPasswordScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -20,6 +21,11 @@ export default function AppNavigator() {
         <Stack.Screen 
           name="SignUpScreen" 
           component={SignUpScreen} 
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen 
+          name="ForgotPasswordScreen" 
+          component={ForgotPasswordScreen} 
           options={{ headerShown: false }}
         />
       </Stack.Navigator>

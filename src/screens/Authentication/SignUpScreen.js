@@ -1,16 +1,18 @@
-import { CurrentRenderContext } from '@react-navigation/native'
 import SegmentedControl from "@react-native-segmented-control/segmented-control";
 import React, { useState } from 'react'
 import { SafeAreaView, StyleSheet, View, Text, TextInput, TouchableOpacity} from 'react-native'
 import { signUp } from "../../services/dataService";
+import { Ionicons } from '@expo/vector-icons'
 
-export default function LoginScreen({ navigation }) {
+export default function SignUpScreen({ navigation }) {
     const [form, setForm] = useState ({
         username: '',
         email: '',
         password: ''
     })
 
+    const [showPassword, setShowPassword] = useState(false)
+    
     const handleSignUp = async () => {
         try {
             const userData = { username: form.username, email: form.email, password: form.password };
@@ -55,12 +57,21 @@ export default function LoginScreen({ navigation }) {
                     >
                     </TextInput>
                     <Text style={styles.inputLabel}>Password</Text>
-                    <TextInput 
-                        secureTextEntry
-                        style={styles.inputControl}
-                        value={form.password}
-                        onChangeText={password => setForm({...form, password})}
-                    ></TextInput>
+                    <View style={styles.containerPasswordInput}>
+                        <TextInput 
+                            secureTextEntry={!showPassword}
+                            style={styles.inputControlPassword}
+                            value={form.password}
+                            onChangeText={password => setForm({...form, password})}
+                        ></TextInput>
+                        <TouchableOpacity
+                            onPress={() => setShowPassword(prev => !prev)}>
+                            <Ionicons 
+                                style={styles.buttonEye}
+                                name={showPassword ? "eye" : "eye-off"}
+                                size={24}/>
+                        </TouchableOpacity>
+                    </View>
                 </View>
                 <TouchableOpacity
                     style={styles.button}
@@ -74,9 +85,9 @@ export default function LoginScreen({ navigation }) {
                     onPress={() => {
                         navigation.navigate('SignInScreen')
                     }}>
-                        <Text style={styles.formFooter}>Already have an account?{' '}
-                            <Text style={{textDecorationLine: 'underline'}}>Sign in</Text>
-                        </Text>
+                    <Text style={styles.formFooter}>Already have an account?{' '}
+                        <Text style={{textDecorationLine: 'underline'}}>Sign in</Text>
+                    </Text>
                 </TouchableOpacity>
                 
         
@@ -135,10 +146,30 @@ const styles = StyleSheet.create({
         fontWeight: '600',
         textAlign: 'center'    
     },
+    formForgotPassword: {
+        fontWeight: '600',
+        textAlign: 'right'
+    },
     subtitle: {
         textAlign: 'center',
         marginBottom: 6,
         opacity: 0.5,
         fontWeight: '500'
-    }
+    },
+    buttonEye: {
+        right: 10,
+        
+    },
+    containerPasswordInput: {
+        flexDirection: "row",
+        alignItems: "center",
+        backgroundColor: "#fff",
+        borderRadius: 8,
+        paddingHorizontal: 10,
+    },
+    inputControlPassword: {
+        backgroundColor: '#ffffffff',
+        borderRadius: 8,
+        flex: 1
+    },
 })

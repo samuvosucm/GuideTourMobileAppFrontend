@@ -2,12 +2,15 @@ import { CurrentRenderContext } from '@react-navigation/native'
 import React, { useState } from 'react'
 import { SafeAreaView, StyleSheet, View, Text, TextInput, TouchableOpacity} from 'react-native'
 import { signIn } from '../../services/dataService'
+import { Ionicons } from '@expo/vector-icons'
 
 export default function SignInScreen({ navigation }) {
     const [form, setForm] = useState ({
         email: '',
         password: ''
     })
+
+    const [showPassword, setShowPassword] = useState(false)
 
     const handleSignIn = async () => {
         try {
@@ -34,12 +37,28 @@ export default function SignInScreen({ navigation }) {
                     >
                     </TextInput>
                     <Text style={styles.inputLabel}>Password</Text>
-                    <TextInput 
-                        secureTextEntry
-                        style={styles.inputControl}
-                        value={form.password}
-                        onChangeText={password => setForm({...form, password})}
-                    ></TextInput>
+                    <View style={styles.containerPasswordInput}>
+                        <TextInput 
+                            secureTextEntry={!showPassword}
+                            style={styles.inputControlPassword}
+                            value={form.password}
+                            onChangeText={password => setForm({...form, password})}
+                        ></TextInput>
+                        <TouchableOpacity
+                            onPress={() => setShowPassword(prev => !prev)}>
+                            <Ionicons 
+                                style={styles.buttonEye}
+                                name={showPassword ? "eye" : "eye-off"}
+                                size={24}/>
+                        </TouchableOpacity>
+                    </View>
+                    <TouchableOpacity
+                        style={styles.formFooterButton}
+                        onPress={() => {
+                            navigation.navigate('ForgotPasswordScreen')
+                        }}>
+                        <Text style={styles.formForgotPassword}>Forgot Password?</Text>
+                    </TouchableOpacity>
                 </View>
                 <TouchableOpacity
                     style={styles.button}
@@ -91,6 +110,11 @@ const styles = StyleSheet.create({
         borderRadius: 8,
         marginBottom: 15
     },
+    inputControlPassword: {
+        backgroundColor: '#ffffffff',
+        borderRadius: 8,
+        flex: 1
+    },
     button: {
         backgroundColor: '#b05454ff',
         borderRadius: 8,
@@ -112,5 +136,21 @@ const styles = StyleSheet.create({
     formFooter: {
         fontWeight: '600',
         textAlign: 'center'    
+    },
+    formForgotPassword: {
+        fontWeight: '600',
+        textAlign: 'right',
+        textDecorationLine: 'underline'
+    },
+    buttonEye: {
+        right: 10,
+        
+    },
+    containerPasswordInput: {
+        flexDirection: "row",
+        alignItems: "center",
+        backgroundColor: "#fff",
+        borderRadius: 8,
+        paddingHorizontal: 10,
     }
 })

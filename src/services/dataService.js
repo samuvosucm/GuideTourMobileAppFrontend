@@ -48,3 +48,7 @@ export const signIn = async (userData) => {
         throw error
     }
 }
+
+export const handlePasswordRecovery = async (userData) => {
+
+}
