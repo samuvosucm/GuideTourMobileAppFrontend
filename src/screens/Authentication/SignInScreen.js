@@ -63,7 +63,9 @@ export default function SignInScreen({ navigation }) {
                 <TouchableOpacity
                     style={styles.button}
                     onPress={() => {
-                        handleSignIn()
+                        //handleSignIn()
+                        navigation.navigate('TouristScreen')
+
                     }}>
                     <Text style={styles.buttonText}>Sign in</Text>
                 </TouchableOpacity>

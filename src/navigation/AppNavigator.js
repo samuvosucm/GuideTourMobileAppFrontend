@@ -3,9 +3,10 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 // Screens
-import SignInScreen from '../screens/Authentication/SignInScreen';
-import SignUpScreen from '../screens/Authentication/SignUpScreen';
-import ForgotPasswordScreen from '../screens/Authentication/ForgotPasswordScreen';
+import SignInScreen from '../screens/authentication/SignInScreen';
+import SignUpScreen from '../screens/authentication/SignUpScreen';
+import ForgotPasswordScreen from '../screens/authentication/ForgotPasswordScreen';
+import TouristNavigator from '../screens/tourist/TouristNavigator';
 
 const Stack = createNativeStackNavigator();
 
@@ -26,6 +27,11 @@ export default function AppNavigator() {
         <Stack.Screen 
           name="ForgotPasswordScreen" 
           component={ForgotPasswordScreen} 
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen 
+          name="TouristScreen" 
+          component={TouristNavigator} 
           options={{ headerShown: false }}
         />
       </Stack.Navigator>

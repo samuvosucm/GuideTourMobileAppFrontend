@@ -1,8 +1,9 @@
 import SegmentedControl from "@react-native-segmented-control/segmented-control";
 import React, { useState } from 'react'
-import { SafeAreaView, StyleSheet, View, Text, TextInput, TouchableOpacity} from 'react-native'
+import { SafeAreaView, StyleSheet, View, Text, TextInput, TouchableOpacity, Alert } from 'react-native'
 import { signUp } from "../../services/dataService";
 import { Ionicons } from '@expo/vector-icons'
+import { isValidEmail, isValidPassword } from "../../utils/inputValidators";
 
 export default function SignUpScreen({ navigation }) {
     const [form, setForm] = useState ({
@@ -13,9 +14,13 @@ export default function SignUpScreen({ navigation }) {
 
     const [showPassword, setShowPassword] = useState(false)
     
+    const roles = ["Traveler", "Guide"]
+    const selectedRole = roles[selectedIndex]
+
     const handleSignUp = async () => {
+
         try {
-            const userData = { username: form.username, email: form.email, password: form.password };
+            const userData = { role: selectedRole, username: form.username, email: form.email, password: form.password };
             const newUser = await signUp(userData); 
         } catch (error) {
             Alert.alert("Error", error.message);
@@ -23,6 +28,7 @@ export default function SignUpScreen({ navigation }) {
     }
 
     const [selectedIndex, setSelectedIndex] = useState(0);
+    
     return(
         <SafeAreaView style={{flex: 1, backgroundColor: '#dce3f0ff'}}>
             <View style={styles.container}>
@@ -31,7 +37,7 @@ export default function SignUpScreen({ navigation }) {
                     <Text style={styles.title}>Create an account</Text>
                     <Text style={styles.subtitle}>Sign up as a</Text>
                     <SegmentedControl 
-                    values={["Traveler", "Guide"]}
+                    values={roles}
                     selectedIndex={selectedIndex}
                     onValueChange={(value) => {
                         setSelectedIndex(value === "Traveler" ? 0 : 1);
@@ -46,14 +52,14 @@ export default function SignUpScreen({ navigation }) {
                     <TextInput 
                         style={styles.inputControl}
                         value={form.username}
-                        onChangeText={username => setForm({...form, username})}
+                        onChangeText={username => setForm(prev => ({ ...prev, username }))}
                     >
                     </TextInput>
                     <Text style={styles.inputLabel}>Email</Text>
                     <TextInput 
                         style={styles.inputControl}
                         value={form.email}
-                        onChangeText={email => setForm({...form, email})}
+                        onChangeText={email => setForm(prev => ({ ...prev, email }))}
                     >
                     </TextInput>
                     <Text style={styles.inputLabel}>Password</Text>
@@ -62,7 +68,7 @@ export default function SignUpScreen({ navigation }) {
                             secureTextEntry={!showPassword}
                             style={styles.inputControlPassword}
                             value={form.password}
-                            onChangeText={password => setForm({...form, password})}
+                            onChangeText={password => setForm(prev => ({ ...prev, password   }))}
                         ></TextInput>
                         <TouchableOpacity
                             onPress={() => setShowPassword(prev => !prev)}>
