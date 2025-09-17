@@ -7,18 +7,18 @@ import TourCardComponent from "../../utils/components/tourCardComponent";
 export default function TouristHomeScreen() {
 
     const tours = [
-    {title: 'Famous Budapest Places', image: require('../../../assets/budapest.jpg'), rating: '4.7', reviews: '23', price: '1.99'},
-    {title: 'Prague City Tour', image: require('../../../assets/prague.jpg'), rating: '4', reviews: '7', price: '2.99'},
-  ]
+      {title: 'Famous Places', image: require('../../../assets/budapest.jpg'), rating: '4.7', reviews: '23', city: 'Budapest'},
+      {title: 'Prague City Tour', image: require('../../../assets/prague.jpg'), rating: '4', reviews: '7', city: 'Prague'},
+    ]
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#f9f9f9' }}>
       <View style={styles.container}>
         <View style={styles.header}>
           <Text style={styles.title}>My Tours</Text>
-          <Text style={styles.subtitle}>Explore your booked and favorite tours</Text>
-          <SearchBar/>
+          <Text style={styles.subtitle}>Explore your booked tours</Text>
         </View>
+        <SearchBar/>
 
         <FlatList
           data={tours}
@@ -31,6 +31,7 @@ export default function TouristHomeScreen() {
                 image={item.image}
                 rating={item.rating}
                 reviews={item.reviews}
+                city={item.city}
               />
             </View>
           )}
@@ -49,7 +50,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   header: {
-    marginBottom: 20,
+    marginBottom: 10,
   },
   title: {
     fontSize: 27,
@@ -63,7 +64,7 @@ const styles = StyleSheet.create({
   },
   column: {
     flex: 1,
-    margin: 5,
+    margin: 1,
     maxWidth: '50%', 
   },
 });

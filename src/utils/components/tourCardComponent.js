@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
-export default function TourCardComponent({ title, image, rating, reviews, price }) {
+export default function TourCardComponent({ title, image, rating, reviews, city }) {
   const numericRating = Number(rating);
 
   return (
@@ -14,7 +14,7 @@ export default function TourCardComponent({ title, image, rating, reviews, price
           {title}
         </Text>
 
-        <View style={styles.ratingPriceRow}>
+        <View style={styles.ratingCityRow}>
           <View style={styles.ratingContainer}>
             <Ionicons name="star" color="#FFD700" size={16} />
             <Text style={styles.ratingText}>
@@ -22,11 +22,9 @@ export default function TourCardComponent({ title, image, rating, reviews, price
             </Text>
           </View>
 
-          {price ? (
-            <View style={styles.priceContainer}>
-              <Text style={styles.priceTag}>{price}€</Text>
-            </View>
-            ) : null}
+          <View style={styles.cityContainer}>
+              <Text style={styles.cityTag}>{city}</Text>
+          </View>
         </View>
       </View>
     </TouchableOpacity>
@@ -59,7 +57,7 @@ const styles = StyleSheet.create({
     marginBottom: 6,
     color: '#222',
   },
-  ratingPriceRow: {
+  ratingCityRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -73,13 +71,13 @@ const styles = StyleSheet.create({
     color: '#555',
     marginLeft: 4,
   },
-  priceContainer: {
+  cityContainer: {
     backgroundColor: '#EFEFEF',
     paddingHorizontal: 6,
     paddingVertical: 2,
     borderRadius: 6,
   },
-  priceTag: {
+  cityTag: {
     fontSize: 13,
     fontWeight: '600',
     color: '#333',
