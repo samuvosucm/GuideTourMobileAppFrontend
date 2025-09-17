@@ -1,8 +1,8 @@
 import React from "react";
-import { View, Text, StyleSheet, Image, Dimensions } from "react-native";
+import { View, Text, StyleSheet, Image, Dimensions, TouchableOpacity } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-export default function TouristProfileScreen() {
+export default function TouristProfileScreen({ navigation }) {
   const user = {
     name: 'Samuel Vos', 
     profilePhoto: null,
@@ -30,7 +30,6 @@ export default function TouristProfileScreen() {
             )}
         </View>
 
-        // datos del usuario
         <View style={styles.profileDataContainer}>
           <Text style={styles.profileDataTag}>Name</Text>
           <Text style={styles.profileDataValue}>{user.name}</Text>
@@ -41,6 +40,16 @@ export default function TouristProfileScreen() {
           <Text style={styles.profileDataValue}>{user.email}</Text>
         </View>
         <View style={styles.line} />
+        <View style={styles.footerButton}>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => {
+              navigation.navigate('SignInScreen')
+            }}>       
+            <Text style={styles.buttonText}>Log out</Text>     
+          </TouchableOpacity>
+        </View>
+
       </View>
     </SafeAreaView>
   );
@@ -89,5 +98,25 @@ const styles = StyleSheet.create({
     width: '100%',            
     marginVertical: 10,  
     marginBottom: 10      
+  },
+  footerButton: {
+    flex: 1, 
+    justifyContent: 'flex-end', 
+    alignItems: 'center' 
+  },
+  button: {
+    backgroundColor: '#b05454ff',
+    borderRadius: 30,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    justifyContent: 'center',
+    marginVertical: 30,
+  },
+  buttonText: {
+    justifyContent: 'center',
+    textAlign: 'center',
+    fontSize: 15,
+    color: '#fff',
+    fontWeight: '600'
   },
 });
