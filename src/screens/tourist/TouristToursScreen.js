@@ -7,6 +7,11 @@ import TourCardComponent from "../../utils/components/tourCardComponent";
 
 export default function TouristToursScreen() {
 
+  const tours = [
+    {title: 'Famous Budapest Places', image: require('../../../assets/budapest.jpg'), rating: '4.7', reviews: '23', price: '1.99'},
+    {title: 'Prague City Tour', image: require('../../../assets/prague.jpg'), rating: '4', reviews: '7', price: '2.99'},
+  ]
+
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <View style={styles.container}>
@@ -24,6 +29,8 @@ export default function TouristToursScreen() {
                 title={item.title}
                 image={item.image}
                 rating={item.rating}
+                reviews={item.reviews}
+                price={item.price}
               />
             </View>
           )}
