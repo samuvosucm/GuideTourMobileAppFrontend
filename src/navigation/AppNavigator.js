@@ -7,6 +7,7 @@ import SignInScreen from '../screens/authentication/SignInScreen';
 import SignUpScreen from '../screens/authentication/SignUpScreen';
 import ForgotPasswordScreen from '../screens/authentication/ForgotPasswordScreen';
 import TouristNavigator from '../screens/tourist/TouristNavigator';
+import TourDetailScreen from '../screens/tourist/TourDetailScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -33,6 +34,11 @@ export default function AppNavigator() {
           name="TouristScreen" 
           component={TouristNavigator} 
           options={{ headerShown: false }}
+        />
+        <Stack.Screen 
+          name="TourDetailScreen" 
+          component={TourDetailScreen} 
+          options={{ title: 'Tour Detail' }} 
         />
       </Stack.Navigator>
     </NavigationContainer>

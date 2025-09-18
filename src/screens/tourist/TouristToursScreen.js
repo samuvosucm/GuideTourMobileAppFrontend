@@ -7,10 +7,10 @@ import TourCardComponent from "../../utils/components/tourCardComponent";
 
 export default function TouristToursScreen() {
 
-  const tours = [
-    {title: 'Famous Places', image: require('../../../assets/budapest.jpg'), rating: '4.7', reviews: '23', city: 'Budapest'},
-    {title: 'Prague City Tour', image: require('../../../assets/prague.jpg'), rating: '4', reviews: '7', city: 'Prague'},
-  ]
+    const tours = [
+      {title: 'Famous Places', image: require('../../../assets/budapest.jpg'), rating: '4.7', reviews: '23', city: 'Budapest', description: "City Tour through Budapest most famous places blablabla"},
+      {title: 'Prague City Tour', image: require('../../../assets/prague.jpg'), rating: '4', reviews: '7', city: 'Prague', description: "City Tour through Prague most famous places blablabla"},
+    ]
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
@@ -26,11 +26,7 @@ export default function TouristToursScreen() {
           renderItem={({ item }) => (
             <View style={styles.column}>
               <TourCardComponent
-                title={item.title}
-                image={item.image}
-                rating={item.rating}
-                reviews={item.reviews}
-                city={item.city}
+                tour = {item}
               />
             </View>
           )}

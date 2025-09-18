@@ -1,29 +1,41 @@
 import React from 'react';
 import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
 
-export default function TourCardComponent({ title, image, rating, reviews, city }) {
-  const numericRating = Number(rating);
+export default function TourCardComponent({ tour }) {
+
+  const numericRating = Number(tour.rating);
+  const navigation = useNavigation()
+
+  const handleOnPress = () => {
+    navigation.navigate("TourDetailScreen", { tour })
+  }
 
   return (
-    <TouchableOpacity style={styles.card} activeOpacity={0.8}>
-      <Image source={image} style={styles.image} resizeMode="cover" />
+    <TouchableOpacity
+      style={styles.card} 
+      activeOpacity={0.8}
+      onPress = {handleOnPress}
+      >
+      
+      <Image source={tour.image} style={styles.image} resizeMode="cover" />
 
       <View style={styles.info}>
         <Text style={styles.title} numberOfLines={1} ellipsizeMode="tail">
-          {title}
+          {tour.title}
         </Text>
 
         <View style={styles.ratingCityRow}>
           <View style={styles.ratingContainer}>
             <Ionicons name="star" color="#FFD700" size={16} />
             <Text style={styles.ratingText}>
-              {numericRating.toFixed(1)} ({reviews})
+              {numericRating.toFixed(1)} ({tour.reviews})
             </Text>
           </View>
 
           <View style={styles.cityContainer}>
-              <Text style={styles.cityTag}>{city}</Text>
+              <Text style={styles.cityTag}>{tour.city}</Text>
           </View>
         </View>
       </View>
