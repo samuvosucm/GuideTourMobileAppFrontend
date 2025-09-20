@@ -5,6 +5,7 @@ import { signUp } from "../../services/dataService";
 import { Ionicons } from '@expo/vector-icons'
 
 export default function SignUpScreen({ navigation }) {
+
     const [form, setForm] = useState ({
         username: '',
         email: '',
@@ -13,9 +14,11 @@ export default function SignUpScreen({ navigation }) {
 
     const [showPassword, setShowPassword] = useState(false)
     
+    const [role, setRole] = useState("Tourist")
+
     const handleSignUp = async () => {
         try {
-            const userData = { username: form.username, email: form.email, password: form.password };
+            const userData = { username: form.username, email: form.email, password: form.password, role: role };
             const newUser = await signUp(userData); 
         } catch (error) {
             Alert.alert("Error", error.message);
@@ -31,11 +34,11 @@ export default function SignUpScreen({ navigation }) {
                     <Text style={styles.title}>Create an account</Text>
                     <Text style={styles.subtitle}>Sign up as a</Text>
                     <SegmentedControl 
-                    values={["Traveler", "Guide"]}
+                    values={["Tourist", "Guide"]}
                     selectedIndex={selectedIndex}
                     onValueChange={(value) => {
-                        setSelectedIndex(value === "Traveler" ? 0 : 1);
-                        
+                        setSelectedIndex(value === "Tourist" ? 0 : 1);
+                        setRole(value)
                     }
                     }
                 

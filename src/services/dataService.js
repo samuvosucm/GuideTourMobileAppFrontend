@@ -20,7 +20,6 @@ export const signUp = async (userData) => {
         const data = await response.json();
         return data;
     } catch (error) {
-        console.error(`Sign up failed: ${error}`)
         throw error
     }
 }
@@ -44,7 +43,6 @@ export const signIn = async (userData) => {
         const data = await response.json();
         return data;
     } catch (error) {
-        console.error(`Sign in failed: ${error}`)
         throw error
     }
 }
