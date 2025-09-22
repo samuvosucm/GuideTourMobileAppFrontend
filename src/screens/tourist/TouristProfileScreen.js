@@ -1,6 +1,7 @@
 import React from "react";
 import { View, Text, StyleSheet, Image, Dimensions, TouchableOpacity } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { signOut } from "../../services/dataService";
 
 export default function TouristProfileScreen({ navigation }) {
   const user = {
@@ -11,6 +12,12 @@ export default function TouristProfileScreen({ navigation }) {
 
   const { width } = Dimensions.get('window');
   const PROFILE_SIZE = width * 0.25;
+
+  const handleLogOut = () => {
+    signOut().then(() => {
+        navigation.navigate('SignInScreen');
+    });  
+  }
 
   return (
     <SafeAreaView style={{ flex: 1}}>
@@ -44,7 +51,7 @@ export default function TouristProfileScreen({ navigation }) {
           <TouchableOpacity
             style={styles.button}
             onPress={() => {
-              navigation.navigate('SignInScreen')
+              handleLogOut()
             }}>       
             <Text style={styles.buttonText}>Log out</Text>     
           </TouchableOpacity>

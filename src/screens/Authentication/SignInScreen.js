@@ -3,6 +3,7 @@ import React, { useState } from 'react'
 import { SafeAreaView, StyleSheet, View, Text, TextInput, TouchableOpacity} from 'react-native'
 import { signIn } from '../../services/dataService'
 import { Ionicons } from '@expo/vector-icons'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 
 export default function SignInScreen({ navigation }) {
     const [form, setForm] = useState ({
@@ -15,7 +16,12 @@ export default function SignInScreen({ navigation }) {
     const handleSignIn = async () => {
         try {
             const userData = { email: form.email, password: form.password };
-            const user = await signIn(userData); 
+            const user = await signIn(userData);  
+           
+            if (user?.jwtToken) {
+                navigation.navigate('TouristScreen')
+            }
+
         } catch (error) {
             Alert.alert("Error", error.message);
         }  
@@ -63,9 +69,7 @@ export default function SignInScreen({ navigation }) {
                 <TouchableOpacity
                     style={styles.button}
                     onPress={() => {
-                        //handleSignIn()
-                        navigation.navigate('TouristScreen')
-
+                        handleSignIn()
                     }}>
                     <Text style={styles.buttonText}>Sign in</Text>
                 </TouchableOpacity>

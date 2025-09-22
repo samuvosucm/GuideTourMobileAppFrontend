@@ -2,12 +2,15 @@ import React from "react";
 import { View, Text, StyleSheet, Image, ScrollView, TouchableOpacity } from "react-native";
 import { useRoute } from "@react-navigation/native";
 
-export default function TourDetailScreen() {
+export default function TourDetailScreen({ navigation }) {
   const route = useRoute();
-  const { tour } = route.params;
+  const { tour, source } = route.params
 
   const handleBuyPress = () => {
-    console.log("Buy pressed for", tour.title);
+
+    if (source === 'owned') {
+      navigation.navigate("TourViewPointScreen", {tour})
+    }
   };
 
   return (
@@ -23,7 +26,7 @@ export default function TourDetailScreen() {
         </View>
 
         <TouchableOpacity style={styles.buyButton} onPress={handleBuyPress}>
-          <Text style={styles.buyText}>Save Tour</Text>
+          <Text style={styles.buyText}>{source === "library" ? 'Save Tour' : 'Play Tour' }</Text>
         </TouchableOpacity>
       </View>
 

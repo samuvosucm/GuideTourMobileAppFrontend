@@ -13,21 +13,26 @@ export default function SignUpScreen({ navigation }) {
     })
 
     const [showPassword, setShowPassword] = useState(false)
-    
-    const roles = ["Traveler", "Guide"]
-    const selectedRole = roles[selectedIndex]
 
     const handleSignUp = async () => {
 
         try {
             const userData = { role: selectedRole, username: form.username, email: form.email, password: form.password };
             const newUser = await signUp(userData); 
+
+            if (user?.jwtToken) {
+                navigation.navigate('TouristScreen')
+            }
+
         } catch (error) {
             Alert.alert("Error", error.message);
         }
     }
 
     const [selectedIndex, setSelectedIndex] = useState(0);
+
+    const roles = ["Traveler", "Guide"]
+    const selectedRole = roles[selectedIndex]
     
     return(
         <SafeAreaView style={{flex: 1, backgroundColor: '#dce3f0ff'}}>

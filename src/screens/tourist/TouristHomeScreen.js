@@ -28,6 +28,7 @@ export default function TouristHomeScreen() {
             <View style={styles.column}>
               <TourCardComponent
                 tour = {item}
+                source = "owned"
               />
             </View>
           )}

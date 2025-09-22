@@ -3,13 +3,13 @@ import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 
-export default function TourCardComponent({ tour }) {
+export default function TourCardComponent({ tour, source = 'library' }) {
 
   const numericRating = Number(tour.rating);
   const navigation = useNavigation()
 
   const handleOnPress = () => {
-    navigation.navigate("TourDetailScreen", { tour })
+    navigation.navigate("TourDetailScreen", { tour, source })
   }
 
   return (
