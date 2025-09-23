@@ -76,7 +76,19 @@ export const signIn = async (userData) => {
 }
 
 export const signOut = async () => {
-    await AsyncStorage.removeItem("token")
+    const token = await AsyncStorage.getItem("token");
+    const response = await fetch(`${API_URL}/api/auth/logout`, {
+    method: "POST",
+    headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`, // include JWT
+        },
+    });
+
+    if (response.ok)
+    {
+        await AsyncStorage.removeItem("token")
+    }
 }
 
 export const handlePasswordRecovery = async (userData) => {
