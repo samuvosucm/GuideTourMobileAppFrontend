@@ -1,45 +1,77 @@
-import React from "react";
-import { View, Text, StyleSheet, Image, Dimensions, TouchableOpacity } from "react-native";
+import React, { useState, useEffect } from "react";
+import { View, Text, StyleSheet, Image, Dimensions, TouchableOpacity, ActivityIndicator } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { signOut } from "../../services/dataService";
+import { getCurrentUser } from "../../services/touristService";
+
 
 export default function TouristProfileScreen({ navigation }) {
-  const user = {
-    name: 'Samuel Vos', 
-    profilePhoto: null,
-    email: 'samuelvos@gmail.com'
-  };
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  const { width } = Dimensions.get('window');
+  const { width } = Dimensions.get("window");
   const PROFILE_SIZE = width * 0.25;
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const u = await getCurrentUser();
+        setUser(u);
+      } catch (err) {
+        console.error("Error fetching user:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUser();
+  }, []);
 
   const handleLogOut = () => {
     signOut().then(() => {
-        navigation.navigate('SignInScreen');
-    });  
+      navigation.navigate("SignInScreen");
+    });
+  };
+
+  if (loading) {
+    return (
+      <SafeAreaView style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <ActivityIndicator size="large" color="#b05454ff" />
+      </SafeAreaView>
+    );
+  }
+
+  if (!user) {
+    return (
+      <SafeAreaView style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <Text>Could not load user data</Text>
+      </SafeAreaView>
+    );
   }
 
   return (
-    <SafeAreaView style={{ flex: 1}}>
+    <SafeAreaView style={{ flex: 1 }}>
       <View style={styles.container}>
         <View style={styles.header}>
-           {user.profilePhoto ? (
-              <Image
-                source={user.profilePhoto}
-                style={[styles.profilePhoto, {width: PROFILE_SIZE, height: PROFILE_SIZE, borderRadius: PROFILE_SIZE/2}]}
-              />
-            ) : (
-              <View style={[styles.profilePlaceholder, {width: PROFILE_SIZE, height: PROFILE_SIZE, borderRadius: PROFILE_SIZE/2}]}>
-                <Text style={[styles.profileInitial, {fontSize: PROFILE_SIZE*0.4}]}>
-                  {user.name.charAt(0).toUpperCase()}
-                </Text>
-              </View>
-            )}
+          {user.profilePhoto ? (
+            <Image
+              source={{ uri: user.profilePhoto }}
+              style={[styles.profilePhoto, { width: PROFILE_SIZE, height: PROFILE_SIZE, borderRadius: PROFILE_SIZE / 2 }]}
+            />
+          ) : (
+            <View
+              style={[styles.profilePlaceholder, { width: PROFILE_SIZE, height: PROFILE_SIZE, borderRadius: PROFILE_SIZE / 2 }]}
+            >
+              <Text style={[styles.profileInitial, { fontSize: PROFILE_SIZE * 0.4 }]}>
+                {user.username?.charAt(0).toUpperCase()}
+              </Text>
+            </View>
+          )}
         </View>
 
         <View style={styles.profileDataContainer}>
           <Text style={styles.profileDataTag}>Name</Text>
-          <Text style={styles.profileDataValue}>{user.name}</Text>
+          <Text style={styles.profileDataValue}>{user.username}</Text>
         </View>
         <View style={styles.line} />
         <View style={styles.profileDataContainer}>
@@ -47,20 +79,17 @@ export default function TouristProfileScreen({ navigation }) {
           <Text style={styles.profileDataValue}>{user.email}</Text>
         </View>
         <View style={styles.line} />
+
         <View style={styles.footerButton}>
-          <TouchableOpacity
-            style={styles.button}
-            onPress={() => {
-              handleLogOut()
-            }}>       
-            <Text style={styles.buttonText}>Log out</Text>     
+          <TouchableOpacity style={styles.button} onPress={handleLogOut}>
+            <Text style={styles.buttonText}>Log out</Text>
           </TouchableOpacity>
         </View>
-
       </View>
     </SafeAreaView>
   );
 }
+
 
 const styles = StyleSheet.create({
   container: {

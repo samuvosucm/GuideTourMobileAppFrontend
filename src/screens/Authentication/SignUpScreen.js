@@ -31,8 +31,9 @@ export default function SignUpScreen({ navigation }) {
 
     const [selectedIndex, setSelectedIndex] = useState(0);
 
-    const roles = ["Traveler", "Guide"]
-    const selectedRole = roles[selectedIndex]
+    const roles = ["Tourist", "Guide"]
+    const roleValues = ["tourist", "guide"]
+    const selectedRole = roleValues[selectedIndex]
     
     return(
         <SafeAreaView style={{flex: 1, backgroundColor: '#dce3f0ff'}}>
