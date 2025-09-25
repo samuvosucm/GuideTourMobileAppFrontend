@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, Image, Dimensions, TouchableOpacity, ActivityIn
 import { SafeAreaView } from "react-native-safe-area-context";
 import { AuthContext } from "../../contexts/AuthContext";
 
-export default function TouristProfileScreen({ navigation }) {
+export default function ProfileScreen({ navigation }) {
   const { user, loading, logOut } = useContext(AuthContext);
   const { width } = Dimensions.get("window");
   const PROFILE_SIZE = width * 0.25;

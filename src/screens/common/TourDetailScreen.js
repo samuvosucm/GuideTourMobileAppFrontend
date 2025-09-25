@@ -1,10 +1,12 @@
-import React from "react";
+import React, { useContext } from "react";
 import { View, Text, StyleSheet, Image, ScrollView, TouchableOpacity } from "react-native";
 import { useRoute } from "@react-navigation/native";
+import { AuthContext } from "../../contexts/AuthContext";
 
 export default function TourDetailScreen({ navigation }) {
   const route = useRoute();
   const { tour, source } = route.params
+  const { role } = useContext(AuthContext)
 
   const handleBuyPress = () => {
 
@@ -26,7 +28,12 @@ export default function TourDetailScreen({ navigation }) {
         </View>
 
         <TouchableOpacity style={styles.buyButton} onPress={handleBuyPress}>
-          <Text style={styles.buyText}>{source === "library" ? 'Save Tour' : 'Play Tour' }</Text>
+          <Text style={styles.buyText}>{
+          
+            role === 'tourist' ?
+              source === "library" ? 'Save Tour' : 'Play Tour' 
+            : 'Edit tour'
+          }</Text>
         </TouchableOpacity>
       </View>
 

@@ -16,7 +16,7 @@ export default function TouristHomeScreen() {
       <View style={styles.container}>
         <View style={styles.header}>
           <Text style={styles.title}>My Tours</Text>
-          <Text style={styles.subtitle}>Explore your booked tours</Text>
+          <Text style={styles.subtitle}>Explore your created tours</Text>
         </View>
         <SearchBar/>
 

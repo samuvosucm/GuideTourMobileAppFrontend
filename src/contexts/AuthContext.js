@@ -35,16 +35,23 @@ export const AuthProvider = ({ children }) => {
 
   // Login function
   const login = async (credentials) => {
-    const data = await signIn(credentials);
-    setUser(data);
-    setToken(data.jwtToken);
-    return data;
+    const user = await signIn(credentials);
+    const userDTO = new UserDTO({
+      username: user.username,
+      email: user.email,
+      role: user.role,
+      id: user.userId,
+    })
+    setUser(userDTO);
+    setToken(user.jwtToken);
+    console.log(data)
   };
 
   // SignUp function
   const register = async (data) => {
     const newUser = await signUp(data);
     const userDTO = new UserDTO({
+      username: newUser.username,
       email: newUser.email,
       role: newUser.role,
       id: newUser.userId,
@@ -53,7 +60,6 @@ export const AuthProvider = ({ children }) => {
     setUser(userDTO)
     setToken(newUser.jwtToken);
     console.log(newUser)
-    return userDTO;
   };
 
   // Logout function

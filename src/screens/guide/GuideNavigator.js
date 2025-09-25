@@ -3,17 +3,16 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Ionicons } from "@expo/vector-icons";
 
 // Screens
-import TouristHomeScreen from "./TouristHomeScreen";
-import ProfileScreen from "../common/ProfileScreen";
-import TouristToursScreen from "./TouristToursScreen";
+import ProfileScreen from '../common/ProfileScreen'
+import GuideHomeScreen from "./GuideHomeScreen";
 
 
 const Tab = createBottomTabNavigator();
 
-export default function TouristNavigator() {
+export default function GuideNavigator() {
   return (
     <Tab.Navigator
-      initialRouteName="Home"
+      initialRouteName="Profile"
       screenOptions={({ route }) => ({
         tabBarIcon: ({ color, size }) => {
           let iconName;
@@ -22,8 +21,6 @@ export default function TouristNavigator() {
             iconName = "home-outline";
           } else if (route.name === "Profile") {
             iconName = "person-outline";
-          } else if (route.name === "My Tours") {
-            iconName = "grid-outline"
           }
 
           return <Ionicons name={iconName} size={size} color={color} />;
@@ -33,8 +30,7 @@ export default function TouristNavigator() {
         tabBarInactiveTintColor: "gray",
       })}
     >
-      <Tab.Screen name ="Home" component={TouristToursScreen}/>
-      <Tab.Screen name="My Tours" component={TouristHomeScreen} />
+      <Tab.Screen name="Home" component={GuideHomeScreen} />
       <Tab.Screen name="Profile" component={ProfileScreen} />
     </Tab.Navigator>
   );

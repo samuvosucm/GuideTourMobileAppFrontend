@@ -8,9 +8,9 @@ import SignInScreen from '../screens/authentication/SignInScreen';
 import SignUpScreen from '../screens/authentication/SignUpScreen';
 import ForgotPasswordScreen from '../screens/authentication/ForgotPasswordScreen';
 import TouristNavigator from '../screens/tourist/TouristNavigator';
-import TourDetailScreen from '../screens/tourist/TourDetailScreen';
-import GuideTestScreen from '../screens/guide/TestScreen';
+import TourDetailScreen from '../screens/common/TourDetailScreen';
 import TourViewPointScreen from '../screens/tourist/TourViewPointScreen';
+import GuideNavigator from '../screens/guide/GuideNavigator';
 
 const Stack = createNativeStackNavigator();
 
@@ -30,8 +30,8 @@ export default function AppNavigator() {
           user.role === 'guide' ? (
             <>
               <Stack.Screen 
-                name="GuideTestScreen" 
-                component={GuideTestScreen} 
+                name="GuideScreen" 
+                component={GuideNavigator} 
                 options={{ headerShown: false }} 
               />
             </>
