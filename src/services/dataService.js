@@ -11,15 +11,6 @@ export const getToken = async () => {
   }
 };
 
-export const getRole = async () => {
-    try {
-        const token = await AsyncStorage.getItem('role');
-        return token;
-    } catch (e) {
-        return 0;
-    }
-}
-
 export const signUp = async (userData) => {
     try {
         const response = await fetch(`${API_URL}/api/auth/signup`, {
@@ -32,7 +23,6 @@ export const signUp = async (userData) => {
         })
 
         if (!response.ok) {
-            // poner mensaje de error (pop up)
             const errorText = await response.text()
             throw new Error("Email already in use")
         }
@@ -41,7 +31,6 @@ export const signUp = async (userData) => {
 
         if (data?.jwtToken) {
             await AsyncStorage.setItem('token', data.jwtToken)
-            await AsyncStorage.setItem('role', data.role)
 
         }
 
@@ -70,7 +59,6 @@ export const signIn = async (userData) => {
 
         if (data?.jwtToken) {
             await AsyncStorage.setItem('token', data.jwtToken)
-            await AsyncStorage.setItem('role', data.role)
         }
         return data;
 
@@ -92,8 +80,6 @@ export const signOut = async () => {
     if (response.ok)
     {
         await AsyncStorage.removeItem("token")
-        await AsyncStorage.removeItem("role")
-
     }
 }
 

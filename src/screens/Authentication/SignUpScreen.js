@@ -8,7 +8,7 @@ import { AuthContext } from "../../contexts/AuthContext";
 
 export default function SignUpScreen({ navigation }) {
 
-    const { register } = useContext(AuthContext)
+    const { register, token } = useContext(AuthContext)
     
     const [form, setForm] = useState ({
         username: '',
@@ -22,11 +22,7 @@ export default function SignUpScreen({ navigation }) {
 
         try {
             const userData = new UserDTO({ role: selectedRole, username: form.username, email: form.email, password: form.password });
-            const newUser = await signUp(userData); 
-
-            if (newUser?.jwtToken) {
-                navigation.navigate('TouristScreen')
-            }
+            await register(userData); 
 
         } catch (error) {
             Alert.alert("Error", error.message);

@@ -16,11 +16,7 @@ export default function SignInScreen({ navigation }) {
     const handleSignIn = async () => {
         try {
             const userData = new UserDTO({ email: form.email, password: form.password });
-            const user = await login(userData);  
-           
-            if (user?.jwtToken) {
-                navigation.replace('TouristScreen');        
-            }
+            await login(userData);  
 
         } catch (error) {
             Alert.alert("Error", error.message);

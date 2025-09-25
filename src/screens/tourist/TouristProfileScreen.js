@@ -10,10 +10,7 @@ export default function TouristProfileScreen({ navigation }) {
 
   const handleLogOut = async () => {
     await logOut();
-    navigation.reset({
-      index: 0,
-      routes: [{ name: "SignInScreen" }],
-  });  };
+  }
 
   if (loading) {
     return (
@@ -66,7 +63,11 @@ export default function TouristProfileScreen({ navigation }) {
           <Text style={styles.profileDataValue}>{user.email}</Text>
         </View>
         <View style={styles.line} />
-        
+        <View style={styles.profileDataContainer}>
+          <Text style={styles.profileDataTag}>Role</Text>
+          <Text style={styles.profileDataValue}>{user.role}</Text>
+        </View>
+        <View style={styles.line} />
         <View style={styles.footerButton}>
           <TouchableOpacity style={styles.button} onPress={handleLogOut}>
             <Text style={styles.buttonText}>Log out</Text>

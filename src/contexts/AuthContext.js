@@ -1,25 +1,30 @@
 import React, { createContext, useState, useEffect } from "react";
 import { getToken, signOut, signIn, signUp } from "../services/dataService";
-import { getCurrentUser } from '../services/touristService'
+import { getCurrentUser } from "../services/touristService";
+import UserDTO from "../dto/UserDTO";
 
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true); // app loading state
+  const [token, setToken] = useState(null);
+  const [role, setRole] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  // On app start, check if token exists and fetch user
   useEffect(() => {
     const initAuth = async () => {
       try {
         const token = await getToken();
         if (token) {
           const currentUser = await getCurrentUser();
+          setToken(token);
           setUser(currentUser);
         }
       } catch (err) {
         console.error("Auth init failed:", err);
         setUser(null);
+        setToken(null);
+        setRole(null);
       } finally {
         setLoading(false);
       }
@@ -30,29 +35,40 @@ export const AuthProvider = ({ children }) => {
 
   // Login function
   const login = async (credentials) => {
-    const loggedInUser = await signIn(credentials);
-    setUser(loggedInUser);
-    return loggedInUser;
+    const data = await signIn(credentials);
+    setUser(data);
+    setToken(data.jwtToken);
+    return data;
   };
 
   // SignUp function
   const register = async (data) => {
     const newUser = await signUp(data);
-    setUser(newUser);
-    return newUser;
+    const userDTO = new UserDTO({
+      email: newUser.email,
+      role: newUser.role,
+      id: newUser.userId,
+    })
+
+    setUser(userDTO)
+    setToken(newUser.jwtToken);
+    console.log(newUser)
+    return userDTO;
   };
 
   // Logout function
   const logOut = async () => {
     await signOut();
     setUser(null);
+    setToken(null);
   };
 
   return (
     <AuthContext.Provider
       value={{
         user,
-        setUser,
+        token,
+        role,
         loading,
         login,
         register,
