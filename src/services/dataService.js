@@ -7,9 +7,18 @@ export const getToken = async () => {
     const token = await AsyncStorage.getItem('token');
     return token;
   } catch (e) {
-    return null;
+    return 0;
   }
 };
+
+export const getRole = async () => {
+    try {
+        const token = await AsyncStorage.getItem('role');
+        return token;
+    } catch (e) {
+        return 0;
+    }
+}
 
 export const signUp = async (userData) => {
     try {
@@ -32,6 +41,8 @@ export const signUp = async (userData) => {
 
         if (data?.jwtToken) {
             await AsyncStorage.setItem('token', data.jwtToken)
+            await AsyncStorage.setItem('role', data.role)
+
         }
 
         return data;
@@ -59,6 +70,7 @@ export const signIn = async (userData) => {
 
         if (data?.jwtToken) {
             await AsyncStorage.setItem('token', data.jwtToken)
+            await AsyncStorage.setItem('role', data.role)
         }
         return data;
 
@@ -73,13 +85,15 @@ export const signOut = async () => {
     method: "POST",
     headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`, // include JWT
+        Authorization: `Bearer ${token}`,
         },
     });
 
     if (response.ok)
     {
         await AsyncStorage.removeItem("token")
+        await AsyncStorage.removeItem("role")
+
     }
 }
 

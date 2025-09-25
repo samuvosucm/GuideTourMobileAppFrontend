@@ -1,37 +1,19 @@
-import React, { useState, useEffect } from "react";
+import React, { useContext } from "react";
 import { View, Text, StyleSheet, Image, Dimensions, TouchableOpacity, ActivityIndicator } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { signOut } from "../../services/dataService";
-import { getCurrentUser } from "../../services/touristService";
-
+import { AuthContext } from "../../contexts/AuthContext";
 
 export default function TouristProfileScreen({ navigation }) {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
-
+  const { user, loading, logOut } = useContext(AuthContext);
   const { width } = Dimensions.get("window");
   const PROFILE_SIZE = width * 0.25;
 
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const u = await getCurrentUser();
-        setUser(u);
-      } catch (err) {
-        console.error("Error fetching user:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchUser();
-  }, []);
-
-  const handleLogOut = () => {
-    signOut().then(() => {
-      navigation.navigate("SignInScreen");
-    });
-  };
+  const handleLogOut = async () => {
+    await logOut();
+    navigation.reset({
+      index: 0,
+      routes: [{ name: "SignInScreen" }],
+  });  };
 
   if (loading) {
     return (
@@ -44,7 +26,12 @@ export default function TouristProfileScreen({ navigation }) {
   if (!user) {
     return (
       <SafeAreaView style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-        <Text>Could not load user data</Text>
+        <View style={styles.container}>
+          <Text>Could not load user data</Text>
+          <TouchableOpacity style={styles.button} onPress={handleLogOut}>
+            <Text style={styles.buttonText}>Log out</Text>
+          </TouchableOpacity>
+        </View>
       </SafeAreaView>
     );
   }
@@ -79,7 +66,7 @@ export default function TouristProfileScreen({ navigation }) {
           <Text style={styles.profileDataValue}>{user.email}</Text>
         </View>
         <View style={styles.line} />
-
+        
         <View style={styles.footerButton}>
           <TouchableOpacity style={styles.button} onPress={handleLogOut}>
             <Text style={styles.buttonText}>Log out</Text>
@@ -89,6 +76,7 @@ export default function TouristProfileScreen({ navigation }) {
     </SafeAreaView>
   );
 }
+
 
 
 const styles = StyleSheet.create({

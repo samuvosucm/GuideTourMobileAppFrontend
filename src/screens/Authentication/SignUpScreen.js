@@ -1,11 +1,15 @@
 import SegmentedControl from "@react-native-segmented-control/segmented-control";
-import React, { useState } from 'react'
+import React, { useContext, useState } from 'react'
 import { SafeAreaView, StyleSheet, View, Text, TextInput, TouchableOpacity, Alert } from 'react-native'
 import { signUp } from "../../services/dataService";
 import { Ionicons } from '@expo/vector-icons'
 import UserDTO from "../../dto/UserDTO";
+import { AuthContext } from "../../contexts/AuthContext";
 
 export default function SignUpScreen({ navigation }) {
+
+    const { register } = useContext(AuthContext)
+    
     const [form, setForm] = useState ({
         username: '',
         email: '',

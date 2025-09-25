@@ -37,6 +37,9 @@ export async function getCurrentUser() {
         if (!response.ok) {
             //no tiene sentido estar lanzando errores porque colapsa la aplicacion
             // aqui habria que quitar este error y poner algun tipo de mensaje de error en la pantalla, o cerrar sesion
+                const text = await response.text();
+
+            console.log("Error fetching user:", text);
             throw new Error(`Failed to fetch user: ${response.status}`);
         }
 
