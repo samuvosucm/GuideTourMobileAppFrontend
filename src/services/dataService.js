@@ -1,6 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const API_URL = 'http://192.168.1.96:8080'
+const API_URL = 'http://192.168.1.22:8080'
 
 export const getToken = async () => {
   try {
@@ -23,8 +23,9 @@ export const signUp = async (userData) => {
         })
 
         if (!response.ok) {
+            // poner mensaje de error (pop up)
             const errorText = await response.text()
-            throw new Error(`Sign up failed: ${errorText}`)
+            throw new Error("Email already in use")
         }
 
         const data = await response.json();
@@ -35,6 +36,7 @@ export const signUp = async (userData) => {
 
         return data;
     } catch (error) {
+
         throw error
     }
 }
@@ -51,28 +53,34 @@ export const signIn = async (userData) => {
         })
 
         if (!response.ok) {
-            const errorText = await response.text()
-            throw new Error(`Sign in failed: ${errorText}`)
+            throw new Error("Invalid Email or Password")
         }
-
         const data = await response.json();
 
         if (data?.jwtToken) {
             await AsyncStorage.setItem('token', data.jwtToken)
         }
-        console.log("success")
         return data;
 
     } catch (error) {
-
-        console.log("no success", getToken())
-
         throw error
     }
 }
 
 export const signOut = async () => {
-    await AsyncStorage.removeItem("token")
+    const token = await AsyncStorage.getItem("token");
+    const response = await fetch(`${API_URL}/api/auth/logout`, {
+    method: "POST",
+    headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`, // include JWT
+        },
+    });
+
+    if (response.ok)
+    {
+        await AsyncStorage.removeItem("token")
+    }
 }
 
 export const handlePasswordRecovery = async (userData) => {

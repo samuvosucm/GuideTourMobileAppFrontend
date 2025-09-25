@@ -3,7 +3,7 @@ import React, { useState } from 'react'
 import { SafeAreaView, StyleSheet, View, Text, TextInput, TouchableOpacity, Alert } from 'react-native'
 import { signUp } from "../../services/dataService";
 import { Ionicons } from '@expo/vector-icons'
-import { isValidEmail, isValidPassword } from "../../utils/inputValidators";
+import UserDTO from "../../dto/UserDTO";
 
 export default function SignUpScreen({ navigation }) {
     const [form, setForm] = useState ({
@@ -17,10 +17,10 @@ export default function SignUpScreen({ navigation }) {
     const handleSignUp = async () => {
 
         try {
-            const userData = { role: selectedRole, username: form.username, email: form.email, password: form.password };
+            const userData = new UserDTO({ role: selectedRole, username: form.username, email: form.email, password: form.password });
             const newUser = await signUp(userData); 
 
-            if (user?.jwtToken) {
+            if (newUser?.jwtToken) {
                 navigation.navigate('TouristScreen')
             }
 
@@ -31,8 +31,9 @@ export default function SignUpScreen({ navigation }) {
 
     const [selectedIndex, setSelectedIndex] = useState(0);
 
-    const roles = ["Traveler", "Guide"]
-    const selectedRole = roles[selectedIndex]
+    const roles = ["Tourist", "Guide"]
+    const roleValues = ["tourist", "guide"]
+    const selectedRole = roleValues[selectedIndex]
     
     return(
         <SafeAreaView style={{flex: 1, backgroundColor: '#dce3f0ff'}}>
@@ -45,7 +46,7 @@ export default function SignUpScreen({ navigation }) {
                     values={roles}
                     selectedIndex={selectedIndex}
                     onValueChange={(value) => {
-                        setSelectedIndex(value === "Traveler" ? 0 : 1);
+                        setSelectedIndex(value === "tourist" ? 0 : 1);
                         
                     }
                     }

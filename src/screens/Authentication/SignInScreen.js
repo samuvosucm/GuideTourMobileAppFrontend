@@ -1,9 +1,10 @@
 import { CurrentRenderContext } from '@react-navigation/native'
 import React, { useState } from 'react'
-import { SafeAreaView, StyleSheet, View, Text, TextInput, TouchableOpacity} from 'react-native'
+import { SafeAreaView, StyleSheet, View, Text, TextInput, TouchableOpacity, Alert} from 'react-native'
 import { signIn } from '../../services/dataService'
 import { Ionicons } from '@expo/vector-icons'
 import AsyncStorage from '@react-native-async-storage/async-storage'
+import UserDTO from '../../dto/UserDTO'
 
 export default function SignInScreen({ navigation }) {
     const [form, setForm] = useState ({
@@ -15,11 +16,11 @@ export default function SignInScreen({ navigation }) {
 
     const handleSignIn = async () => {
         try {
-            const userData = { email: form.email, password: form.password };
+            const userData = new UserDTO({ email: form.email, password: form.password });
             const user = await signIn(userData);  
            
             if (user?.jwtToken) {
-                navigation.navigate('TouristScreen')
+                navigation.replace('TouristScreen');        
             }
 
         } catch (error) {
