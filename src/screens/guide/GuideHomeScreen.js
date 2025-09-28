@@ -1,23 +1,38 @@
-import React from "react";
-import { View, Text, StyleSheet, FlatList, TouchableOpacity } from "react-native";
+import React, { useEffect, useState } from "react";
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import SearchBar from "../../utils/components/searchBarComponent";
 import TourCardComponent from "../../utils/components/tourCardComponent";
+import { useNavigation } from "@react-navigation/native";
+import { getMyTours } from "../../services/guideService"; // <- replace with your actual fetch function
 
 export default function TouristHomeScreen() {
+  const [tours, setTours] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const tours = [
-    {title: 'Famous Places', image: require('../../../assets/budapest.jpg'), rating: '4.7', reviews: '23', city: 'Budapest', description: "City Tour through Budapest most famous places blablabla"},
-    {title: 'Prague City Tour', image: require('../../../assets/prague.jpg'), rating: '4', reviews: '7', city: 'Prague', description: "City Tour through Prague most famous places blablabla"},
-  ];
+  const navigation = useNavigation();
 
-  // 🔹 función para crear tour
   const onCreateTourPressed = () => {
-    console.log("Create tour button pressed");
+    navigation.navigate("CreateTourScreen");
   };
 
+  useEffect(() => {
+    const fetchTours = async () => {
+      try {
+        const data = await getMyTours(); // fetch tours from your service
+        setTours(data || []); // fallback to empty array
+      } catch (err) {
+        console.error("Error fetching tours:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTours();
+  }, []);
+
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#f9f9f9' }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: "#f9f9f9" }}>
       <View style={styles.container}>
         <View style={styles.header}>
           <Text style={styles.title}>My Tours</Text>
@@ -25,25 +40,33 @@ export default function TouristHomeScreen() {
         </View>
         <SearchBar />
 
-        <FlatList
-          data={tours}
-          keyExtractor={(item, index) => index.toString()}
-          numColumns={2}
-          renderItem={({ item }) => (
-            <View style={styles.column}>
-              <TourCardComponent
-                tour={item}
-                source="owned"
-              />
-            </View>
-          )}
-          contentContainerStyle={{ paddingVertical: 5 }}
-          showsVerticalScrollIndicator={false}
-        />
+        {loading ? (
+          <ActivityIndicator size="large" color="#b05454ff" style={{ marginTop: 20 }} />
+        ) : (
+          <FlatList
+            data={tours}
+            keyExtractor={(item, index) => item.id?.toString() ?? index.toString()}
+            numColumns={2}
+            renderItem={({ item }) => (
+              <View style={styles.column}>
+                <TourCardComponent tour={item} source="owned" />
+              </View>
+            )}
+            contentContainerStyle={{ paddingVertical: 5 }}
+            showsVerticalScrollIndicator={false}
+            ListEmptyComponent={
+              <View style={{ alignItems: "center", marginTop: 50 }}>
+                <Text>No tours found.</Text>
+              </View>
+            }
+          />
+        )}
       </View>
-        <TouchableOpacity style={styles.fab} onPress={onCreateTourPressed}>
-          <Text style={styles.fabText}>+</Text>
-        </TouchableOpacity>
+
+      {/* Floating Action Button */}
+      <TouchableOpacity style={styles.fab} onPress={onCreateTourPressed}>
+        <Text style={styles.fabText}>+</Text>
+      </TouchableOpacity>
     </SafeAreaView>
   );
 }
@@ -59,39 +82,39 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 27,
-    fontWeight: '700',
-    color: '#222',
+    fontWeight: "700",
+    color: "#222",
   },
   subtitle: {
     fontSize: 14,
-    color: '#555',
+    color: "#555",
     marginTop: 4,
   },
   column: {
     flex: 1,
     margin: 1,
-    maxWidth: '50%', 
+    maxWidth: "50%",
   },
   fab: {
-    position: 'absolute',
+    position: "absolute",
     bottom: 20,
     right: 20,
-    backgroundColor: '#b05454ff',
+    backgroundColor: "#b05454ff",
     width: 60,
     height: 60,
     borderRadius: 15,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     elevation: 5,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 3,
   },
   fabText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 30,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 2,
   },
 });

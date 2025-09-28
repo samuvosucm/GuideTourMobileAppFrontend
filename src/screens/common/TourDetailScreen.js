@@ -6,9 +6,10 @@ import { AuthContext } from "../../contexts/AuthContext";
 export default function TourDetailScreen({ navigation }) {
   const route = useRoute();
   const { tour, source } = route.params
-  const { role } = useContext(AuthContext)
+  const { user } = useContext(AuthContext)
 
   const handleBuyPress = () => {
+
 
     if (source === 'owned') {
       navigation.navigate("TourViewPointScreen", {tour})
@@ -30,7 +31,7 @@ export default function TourDetailScreen({ navigation }) {
         <TouchableOpacity style={styles.buyButton} onPress={handleBuyPress}>
           <Text style={styles.buyText}>{
           
-            role === 'tourist' ?
+            user.role === 'tourist' ?
               source === "library" ? 'Save Tour' : 'Play Tour' 
             : 'Edit tour'
           }</Text>

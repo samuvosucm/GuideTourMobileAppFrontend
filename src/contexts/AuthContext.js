@@ -1,6 +1,5 @@
 import React, { createContext, useState, useEffect } from "react";
-import { getToken, signOut, signIn, signUp } from "../services/dataService";
-import { getCurrentUser } from "../services/touristService";
+import { getToken, signOut, signIn, signUp, getCurrentUser } from "../services/dataService";
 import UserDTO from "../dto/UserDTO";
 
 export const AuthContext = createContext();
@@ -8,61 +7,72 @@ export const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(null);
-  const [role, setRole] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // Init on app start
   useEffect(() => {
     const initAuth = async () => {
       try {
         const token = await getToken();
         if (token) {
-          const currentUser = await getCurrentUser();
           setToken(token);
-          setUser(currentUser);
+          const currentUser = await getCurrentUser();
+          setUser(new UserDTO({
+            username: currentUser.username,
+            email: currentUser.email,
+            role: currentUser.role,
+            id: currentUser.id
+          }));
         }
       } catch (err) {
         console.error("Auth init failed:", err);
         setUser(null);
         setToken(null);
-        setRole(null);
       } finally {
         setLoading(false);
       }
     };
-
     initAuth();
   }, []);
 
-  // Login function
   const login = async (credentials) => {
-    const user = await signIn(credentials);
-    const userDTO = new UserDTO({
-      username: user.username,
-      email: user.email,
-      role: user.role,
-      id: user.userId,
-    })
-    setUser(userDTO);
-    setToken(user.jwtToken);
-    console.log(data)
+    setLoading(true);
+    try {
+      const loginResponse = await signIn(credentials);
+      const token = loginResponse.jwtToken;
+      setToken(token);
+
+      const currentUser = await getCurrentUser();
+      setUser(new UserDTO({
+        username: currentUser.username,
+        email: currentUser.email,
+        role: currentUser.role,
+        id: currentUser.id
+      }));
+    } finally {
+      setLoading(false);
+    }
   };
 
-  // SignUp function
   const register = async (data) => {
-    const newUser = await signUp(data);
-    const userDTO = new UserDTO({
-      username: newUser.username,
-      email: newUser.email,
-      role: newUser.role,
-      id: newUser.userId,
-    })
+    setLoading(true);
+    try {
+      const signUpResponse = await signUp(data);
+      const token = signUpResponse.jwtToken;
+      setToken(token);
 
-    setUser(userDTO)
-    setToken(newUser.jwtToken);
-    console.log(newUser)
+      const currentUser = await getCurrentUser();
+      setUser(new UserDTO({
+        username: currentUser.username,
+        email: currentUser.email,
+        role: currentUser.role,
+        id: currentUser.id
+      }));
+    } finally {
+      setLoading(false);
+    }
   };
 
-  // Logout function
   const logOut = async () => {
     await signOut();
     setUser(null);
@@ -70,17 +80,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider
-      value={{
-        user,
-        token,
-        role,
-        loading,
-        login,
-        register,
-        logOut,
-      }}
-    >
+    <AuthContext.Provider value={{ user, token, loading, login, register, logOut }}>
       {children}
     </AuthContext.Provider>
   );

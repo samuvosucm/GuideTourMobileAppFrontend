@@ -1,4 +1,4 @@
-import React, { useState, useRef, useMemo, useCallback } from 'react';
+import React, { useState, useRef, useMemo } from 'react';
 import {
   View,
   Text,
@@ -13,6 +13,7 @@ import { useRoute } from '@react-navigation/native';
 import BottomSheet, { BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import { Ionicons } from '@expo/vector-icons';
 import { Video } from 'expo-av';
+import MapView, { Marker } from 'react-native-maps';
 
 export default function TourViewPointScreen() {
   const route = useRoute();
@@ -24,32 +25,26 @@ export default function TourViewPointScreen() {
   const point = points?.[currentIndex];
   const [visibleMedia, setVisibleMedia] = useState(null); // null | 'image' | 'video' | 'audio'
 
-  // bottom sheet ref + snap points
   const bottomSheetRef = useRef(null);
-  // 0 => peek (15%), 1 => expanded (85%)
   const snapPoints = useMemo(() => ['15%', '85%'], []);
 
-  // helpers
   const hasImages = Array.isArray(point?.images) ? point.images.length > 0 : !!point?.image;
   const hasVideo = !!point?.video;
   const hasAudio = !!point?.audio;
 
-  const getImageSource = useCallback((img) => {
+  const getImageSource = (img) => {
     if (!img) return { uri: 'https://via.placeholder.com/300x300?text=No+Image' };
     if (typeof img === 'string') return { uri: img };
     return img;
-  }, []);
+  };
 
   const switchToIndex = (index) => {
     const clamped = Math.max(0, Math.min(points.length - 1, index));
     setCurrentIndex(clamped);
     setVisibleMedia(null);
-    // opcional: al cambiar, abrimos a expanded
     try {
       bottomSheetRef.current?.snapToIndex(0);
-    } catch (e) {
-      /* ignore */
-    }
+    } catch (e) {}
   };
 
   const renderImagesPanel = () => {
@@ -73,7 +68,6 @@ export default function TourViewPointScreen() {
 
     return (
       <View style={styles.galleryContainer}>
-        
         <View style={{ flexDirection: 'row' }}>
           {images.map((it, i) => (
             <Image
@@ -95,47 +89,56 @@ export default function TourViewPointScreen() {
     return (
       <View style={styles.mediaVideoWrap}>
         <Video
-          
           source={typeof source === 'string' ? { uri: source } : source}
           style={visibleMedia === 'audio' ? styles.mediaAudioPlayer : styles.mediaVideoPlayer}
           useNativeControls
           resizeMode="contain"
           isLooping={false}
-        
         />
       </View>
     );
   };
 
-  // If there are no points, show fallback
   if (!points || points.length === 0) {
     return (
       <SafeAreaView style={[styles.safeArea, styles.center]}>
-       
         <Text>No hay puntos para mostrar.</Text>
-     
       </SafeAreaView>
     );
   }
 
   return (
     <View style={{ flex: 1 }}>
-      {/* Map placeholder. Change later with MapView. */}
-      <View style={styles.mapContainer} pointerEvents="none">
-        <Text style={styles.mapText}>MAP (placeholder) — Here we'll have MapView</Text>
-      </View>
+      {/* Map */}
+      <MapView
+        style={styles.mapContainer}
+        initialRegion={{
+          latitude: point?.latitude ?? 46.948,
+          longitude: point?.longitude ?? 7.447,
+          latitudeDelta: 0.05,
+          longitudeDelta: 0.05,
+        }}
+      >
+        {points.map((p, i) => (
+          <Marker
+            key={i}
+            coordinate={{
+              latitude: p.latitude ?? 46.948,
+              longitude: p.longitude ?? 7.447,
+            }}
+            title={p.name}
+            description={p.subtitle}
+          />
+        ))}
+      </MapView>
 
-      
       <BottomSheet
         ref={bottomSheetRef}
         index={1}
         snapPoints={snapPoints}
         enablePanDownToClose={false}
       >
-        {/* Use BottomSheetScrollView to allow inner scrolling which coordinates
-            with the sheet gestures. */}
         <BottomSheetScrollView contentContainerStyle={styles.sheetContent}>
-          {/* HEADER */}
           <View style={styles.headerRow}>
             {point?.image ? (
               <Image source={getImageSource(point.image)} style={styles.avatar} />
@@ -151,10 +154,8 @@ export default function TourViewPointScreen() {
             </View>
           </View>
 
-          {/* DESCRIPTION */}
           <Text style={styles.description}>{point?.description ?? 'No description'}</Text>
 
-          {/* MEDIA BUTTONS */}
           <View style={styles.buttonsRow}>
             <TouchableOpacity
               style={[styles.mediaButton, !hasImages && styles.mediaButtonDisabled]}
@@ -184,17 +185,13 @@ export default function TourViewPointScreen() {
             </TouchableOpacity>
           </View>
 
-          {/* INLINE MEDIA VIEWER */}
           <View style={styles.inlineMediaArea}>
             {visibleMedia === 'image' && renderImagesPanel()}
             {(visibleMedia === 'video' || visibleMedia === 'audio') && renderVideoOrAudio()}
           </View>
 
-          {/* Extra spacing so that you can scroll the content when the sheet
-              is expanded. */}
           <View style={{ height: 120 }} />
 
-          {/* NAV BUTTONS: */}
           <View style={styles.navButtonsFixed} pointerEvents="box-none">
             <TouchableOpacity
               style={[styles.navButton, currentIndex === 0 && styles.navButtonDisabled]}
@@ -220,9 +217,7 @@ export default function TourViewPointScreen() {
   );
 }
 
-// -----------------------------------------------------------------------------
-// Sample data
-// -----------------------------------------------------------------------------
+// Sample points
 const SAMPLE_POINTS = [
   {
     name: 'Parliament Building',
@@ -235,6 +230,8 @@ const SAMPLE_POINTS = [
     ],
     video: 'https://www.w3schools.com/html/mov_bbb.mp4',
     audio: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
+    latitude: 47.498, // example
+    longitude: 19.039,
   },
   {
     name: 'Chain Bridge',
@@ -244,6 +241,8 @@ const SAMPLE_POINTS = [
     images: [],
     video: null,
     audio: null,
+    latitude: 47.498,
+    longitude: 19.043,
   },
 ];
 
@@ -252,22 +251,9 @@ const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: '#fff' },
   center: { justifyContent: 'center', alignItems: 'center' },
 
-  // Map placeholder (change for MapView)
-  mapContainer: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: '#eaf4ff',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  mapText: { color: '#1b4965', fontWeight: '700' },
+  mapContainer: { ...StyleSheet.absoluteFillObject },
 
-  // sheet content
-  sheetContent: {
-    padding: 20,
-    paddingBottom: 40,
-    flexGrow: 1,
-  },
-
+  sheetContent: { padding: 20, paddingBottom: 40, flexGrow: 1 },
   headerRow: { flexDirection: 'row', alignItems: 'center' },
   avatar: { width: 86, height: 86, borderRadius: 43, backgroundColor: '#ddd', marginRight: 14 },
   avatarPlaceholder: { justifyContent: 'center', alignItems: 'center', backgroundColor: '#f0f0f0' },
@@ -275,14 +261,11 @@ const styles = StyleSheet.create({
   title: { fontSize: 20, fontWeight: '700', color: '#222' },
   subtitle: { fontSize: 13, color: '#666', marginTop: 4 },
   description: { marginTop: 16, fontSize: 15, lineHeight: 22, color: '#444' },
-
-  // MEDIA BUTTONS
-  buttonsRow: { flexDirection: 'row', justifyContent: 'center', marginTop: 22, paddingVertical: 10, paddingHorizontal: 0 },
+  buttonsRow: { flexDirection: 'row', justifyContent: 'center', marginTop: 22, paddingVertical: 10 },
   mediaButton: { flex: 1, alignItems: 'center', paddingVertical: 10, marginHorizontal: 0, backgroundColor: '#fff', borderRadius: 12, elevation: 1, shadowColor: '#000', shadowOpacity: 0.04, shadowRadius: 6, shadowOffset: { width: 0, height: 2 } },
   mediaButtonDisabled: { backgroundColor: '#f3f3f4' },
   mediaText: { marginTop: 6, fontSize: 13, color: '#333', fontWeight: '600' },
   mediaTextDisabled: { color: '#aaa', fontWeight: '500' },
-
   inlineMediaArea: { marginTop: 10 },
   mediaImageFull: { width: '100%', height: 220, borderRadius: 12, backgroundColor: '#eee' },
   galleryContainer: { paddingVertical: 8 },
@@ -290,17 +273,7 @@ const styles = StyleSheet.create({
   mediaVideoWrap: { marginTop: 8, borderRadius: 12, overflow: 'hidden', backgroundColor: '#000' },
   mediaVideoPlayer: { width: '100%', height: 220 },
   mediaAudioPlayer: { width: '100%', height: 60 },
-
-  // Nav buttons fixed at bottom of the sheet
-  navButtonsFixed: {
-    position: 'absolute',
-    left: 20,
-    right: 20,
-    bottom: Platform.OS === 'ios' ? 80 : 60, 
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
+  navButtonsFixed: { position: 'absolute', left: 20, right: 20, bottom: Platform.OS === 'ios' ? 80 : 60, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   navButton: { flexDirection: 'row', alignItems: 'center', paddingVertical: 10, paddingHorizontal: 18, backgroundColor: '#fff', borderRadius: 12, borderWidth: 1, borderColor: '#e6e6e6' },
   navButtonDisabled: { backgroundColor: '#f3f3f4', borderColor: '#e6e6e6' },
   navButtonText: { color: '#000', fontWeight: '700', marginHorizontal: 8 },

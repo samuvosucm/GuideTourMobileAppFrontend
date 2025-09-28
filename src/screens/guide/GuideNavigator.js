@@ -12,7 +12,7 @@ const Tab = createBottomTabNavigator();
 export default function GuideNavigator() {
   return (
     <Tab.Navigator
-      initialRouteName="Profile"
+      initialRouteName="Home"
       screenOptions={({ route }) => ({
         tabBarIcon: ({ color, size }) => {
           let iconName;
