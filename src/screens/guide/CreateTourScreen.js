@@ -61,7 +61,8 @@ export default function CreateTourScreen() {
       return;
     }
     navigation.navigate("AddLocationScreen", {
-      tourData: { title, description, country, thumbnail },
+      tourData: { title, description, country },
+      thumbnail
     });
   };
 

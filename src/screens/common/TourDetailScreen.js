@@ -1,40 +1,52 @@
-import React, { useContext } from "react";
+import React, { useContext, useState } from "react";
 import { View, Text, StyleSheet, Image, ScrollView, TouchableOpacity } from "react-native";
 import { useRoute } from "@react-navigation/native";
 import { AuthContext } from "../../contexts/AuthContext";
+import { saveTour } from "../../services/touristService";
 
 export default function TourDetailScreen({ navigation }) {
   const route = useRoute();
-  const { tour, source } = route.params
-  const { user } = useContext(AuthContext)
+  const { tour, source } = route.params;
+  const { user } = useContext(AuthContext);
 
-  const handleBuyPress = () => {
+  const [currentSource, setCurrentSource] = useState(source)
 
-
-    if (source === 'owned') {
-      navigation.navigate("TourViewPointScreen", {tour})
+  const handleBuyPress = async () => {
+    if (currentSource === 'owned') {
+      navigation.navigate("TourViewPointScreen", { tour });
+    }
+    else if (currentSource === 'library') {
+      console.log("saving")
+      await saveTour(tour.id)
+      setCurrentSource("owned")
     }
   };
 
   return (
     <ScrollView style={styles.container}>
-      <Image source={tour.image} style={styles.image} resizeMode="cover" />
+      <Image source={{ uri: tour.thumbnailUrl }} style={styles.image} resizeMode="cover" />
 
       <Text style={styles.title}>{tour.title}</Text>
 
       <View style={styles.infoRow}>
         <View style={styles.leftInfo}>
-          <Text style={styles.rating}>{tour.rating} ⭐ ({tour.reviews} reviews)</Text>
-          {tour.city && <Text style={styles.city}>{tour.city}</Text>}
+          {/* Show rating only if it exists */}
+          {(tour.rating !== null && tour.rating !== undefined) && (
+            <Text style={styles.rating}>
+              {Number(tour.rating).toFixed(1)} ⭐ ({tour.reviews ?? 0} reviews)
+            </Text>
+          )}
+
+          {/* Show city only if it exists */}
+          {tour.country && <Text style={styles.city}>{tour.country}</Text>}
         </View>
 
         <TouchableOpacity style={styles.buyButton} onPress={handleBuyPress}>
-          <Text style={styles.buyText}>{
-          
-            user.role === 'tourist' ?
-              source === "library" ? 'Save Tour' : 'Play Tour' 
-            : 'Edit tour'
-          }</Text>
+          <Text style={styles.buyText}>
+            {user.role === 'tourist'
+              ? currentSource === "library" ? 'Save Tour' : 'Play Tour'
+              : 'Edit tour'}
+          </Text>
         </TouchableOpacity>
       </View>
 
@@ -48,12 +60,11 @@ export default function TourDetailScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f2f2f7", // subtle light background
+    backgroundColor: "#f2f2f7",
   },
   image: {
     width: "100%",
     height: 280,
-
   },
   title: {
     fontSize: 28,

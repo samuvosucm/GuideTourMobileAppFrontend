@@ -1,17 +1,29 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { View, StyleSheet, FlatList } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import SearchBar from "../../utils/components/searchBarComponent";
 import FilterComponent from "../../utils/components/filterComponent";
 import TourCardComponent from "../../utils/components/tourCardComponent";
-
+import { getAllTours } from '../../services/touristService'
 export default function TouristToursScreen() {
 
-    const tours = [
-      {title: 'Famous Places', image: require('../../../assets/budapest.jpg'), rating: '4.7', reviews: '23', city: 'Budapest', description: "City Tour through Budapest most famous places blablabla"},
-      {title: 'Prague City Tour', image: require('../../../assets/prague.jpg'), rating: '4', reviews: '7', city: 'Prague', description: "City Tour through Prague most famous places blablabla"},
-    ]
+    const [tours, setTours] = useState([]);
 
+    useEffect(() => {
+    const fetchTours = async () => {
+      try {
+        const data = await getAllTours(); // fetch tours from your service
+        console.log(data)
+        setTours(data || []); // fallback to empty array
+      } catch (err) {
+        console.error("Error fetching tours:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTours();
+  }, []);
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <View style={styles.container}>
@@ -27,6 +39,7 @@ export default function TouristToursScreen() {
             <View style={styles.column}>
               <TourCardComponent
                 tour = {item}
+                source = "library"
               />
             </View>
           )}

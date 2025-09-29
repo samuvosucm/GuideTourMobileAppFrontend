@@ -17,7 +17,7 @@ import { createTour } from "../../services/guideService";
 export default function AddLocationScreen() {
   const route = useRoute();
   const navigation = useNavigation();
-  const { tourData } = route.params;
+  const { tourData, thumbnail } = route.params;
 
   const [locations, setLocations] = useState([]);
   const [name, setName] = useState("");
@@ -79,7 +79,7 @@ const submitTour = async () => {
   const fullTour = { ...tourData, locations };
 
   try {
-    const response = await createTour(fullTour);
+    const response = await createTour(fullTour, thumbnail);
     console.log("Tour created successfully:", response);
     Alert.alert("Tour Created", "Tour with locations added successfully!");
     navigation.navigate("GuideScreen")

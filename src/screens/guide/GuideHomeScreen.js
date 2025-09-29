@@ -4,7 +4,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import SearchBar from "../../utils/components/searchBarComponent";
 import TourCardComponent from "../../utils/components/tourCardComponent";
 import { useNavigation } from "@react-navigation/native";
-import { getMyTours } from "../../services/guideService"; // <- replace with your actual fetch function
+import { getMyTours } from "../../services/guideService"; 
 
 export default function TouristHomeScreen() {
   const [tours, setTours] = useState([]);
@@ -20,6 +20,7 @@ export default function TouristHomeScreen() {
     const fetchTours = async () => {
       try {
         const data = await getMyTours(); // fetch tours from your service
+        console.log(data)
         setTours(data || []); // fallback to empty array
       } catch (err) {
         console.error("Error fetching tours:", err);

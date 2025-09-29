@@ -6,42 +6,48 @@ import { useNavigation } from '@react-navigation/native';
 export default function TourCardComponent({ tour, source = 'library' }) {
 
   const numericRating = Number(tour.rating);
-  const navigation = useNavigation()
+  const navigation = useNavigation();
 
   const handleOnPress = () => {
-    navigation.navigate("TourDetailScreen", { tour, source })
-  }
+    navigation.navigate("TourDetailScreen", { tour, source });
+  };
 
   return (
     <TouchableOpacity
       style={styles.card} 
       activeOpacity={0.8}
-      onPress = {handleOnPress}
-      >
-      
-      <Image source={tour.image} style={styles.image} resizeMode="cover" />
+      onPress={handleOnPress}
+    >
+      <Image 
+        source={{ uri: tour.thumbnailUrl }} 
+        style={styles.image} 
+        resizeMode="cover" 
+      />
 
       <View style={styles.info}>
         <Text style={styles.title} numberOfLines={1} ellipsizeMode="tail">
           {tour.title}
         </Text>
 
-        <View style={styles.ratingCityRow}>
-          <View style={styles.ratingContainer}>
-            <Ionicons name="star" color="#FFD700" size={16} />
-            <Text style={styles.ratingText}>
-              {numericRating.toFixed(1)} ({tour.reviews})
-            </Text>
-          </View>
-
-          <View style={styles.cityContainer}>
-              <Text style={styles.cityTag}>{tour.city}</Text>
-          </View>
+          <View style={styles.ratingCityRow}>
+        {/* Show rating only if it exists */}
+        {(tour.rating !== null && tour.rating !== undefined) && (
+            <View style={styles.ratingContainer}>
+              <Ionicons name="star" color="#FFD700" size={16} />
+              <Text style={styles.ratingText}>
+                {numericRating.toFixed(1)} ({tour.reviews ?? 0})
+              </Text>
+            </View>
+        )}
+        <View style={styles.cityContainer}>
+            <Text style={styles.cityTag}>{tour.country}</Text>
+            </View>
         </View>
       </View>
     </TouchableOpacity>
   );
 }
+
 
 const styles = StyleSheet.create({
   card: {

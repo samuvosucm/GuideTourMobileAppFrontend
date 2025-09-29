@@ -1,69 +1,68 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { uploadSingleMedia } from "./cloudinaryService";
 
-const API_URL = 'http://192.168.1.22:8080';
+const API_URL = "http://192.168.1.9:8080";
 
 export async function getMyTours() {
   try {
     const token = await AsyncStorage.getItem("token");
+    if (!token) return [];
 
-    if (!token) {
-      return []; // devolvemos vacío
-    }
-
-    // Call backend endpoint
     const response = await fetch(`${API_URL}/api/tours/mytours`, {
       method: "GET",
       headers: {
+        Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`, // include JWT
       },
     });
 
-    // Si no hay tours o endpoint devuelve error → devolvemos []
     if (!response.ok) {
-      throw new Error(`Failed to fetch tours: ${response.status} - ${text}`);
-
-      // si es 404, 409 o similar devolvemos []
-      if ([404, 409, 204].includes(response.status)) {
-        return [];
-      }
-
-      // si es otro error real (500 etc.), entonces sí lanzamos
+      if ([404, 409, 204].includes(response.status)) return [];
       const text = await response.text();
-      throw new Error(`Failed to fetch tours: ${response.status} - ${text}`);
+      throw new Error(text || "Failed to fetch tours");
     }
 
-    // Parse JSON response
     const tours = await response.json();
     return Array.isArray(tours) ? tours : [];
   } catch (error) {
-    console.error("Error fetching current tours:", error);
-    // devolvemos [] en caso de fallo para no romper la app
+    console.error("Error fetching tours:", error);
     return [];
   }
 }
 
-export async function createTour(tourData) {
+export async function createTour(tourData, thumbnailUri) {
   try {
     const token = await AsyncStorage.getItem("token");
     if (!token) throw new Error("No token found");
 
+    let uploadedThumbnail = thumbnailUri
+    if (thumbnailUri && !thumbnailUri.startsWith('http')) {
+      uploadedThumbnail = await uploadSingleMedia(thumbnailUri)
+    }
+    const payload = {
+      ...tourData,
+      thumbnail: uploadedThumbnail,
+      locations: (tourData.locations || []).map(loc => ({
+        ...loc,
+        media: loc.media || [],
+      })),
+    };
+
     const response = await fetch(`${API_URL}/api/tours/save`, {
       method: "POST",
       headers: {
-        "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
       },
-      body: JSON.stringify(tourData),
+      body: JSON.stringify(payload),
     });
 
     if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`Failed to create tour: ${response.status} - ${errorText}`);
+      const text = await response.text();
+      throw new Error(text || `Failed to create tour: ${response.status}`);
     }
 
-    const successResponse = await response.json();
-    return successResponse;
+    return await response.json();
   } catch (error) {
     console.error("Error creating tour:", error);
     throw error;
