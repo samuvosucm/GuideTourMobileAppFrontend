@@ -1,58 +1,91 @@
 import React, { useContext, useState } from "react";
-import { View, Text, StyleSheet, Image, ScrollView, TouchableOpacity } from "react-native";
+import { View, Text, StyleSheet, Image, ScrollView, TouchableOpacity, Alert } from "react-native";
 import { useRoute } from "@react-navigation/native";
 import { AuthContext } from "../../contexts/AuthContext";
-import { saveTour } from "../../services/touristService";
+import { saveTour, removeTour } from "../../services/touristService";
 
 export default function TourDetailScreen({ navigation }) {
   const route = useRoute();
   const { tour, source } = route.params;
   const { user } = useContext(AuthContext);
 
-  const [currentSource, setCurrentSource] = useState(source)
+  const [currentSource, setCurrentSource] = useState(source);
 
-  const handleBuyPress = async () => {
-    if (currentSource === 'owned') {
+  const handleSaveOrPlayPress = async () => {
+    if (currentSource === "owned") {
       navigation.navigate("TourViewPointScreen", { tour });
+    } else if (currentSource === "library") {
+      try {
+        await saveTour(tour.id);
+        setCurrentSource("owned");
+      } catch (err) {
+        console.error("Error saving tour:", err);
+      }
     }
-    else if (currentSource === 'library') {
-      console.log("saving")
-      await saveTour(tour.id)
-      setCurrentSource("owned")
-    }
+  };
+
+  const handleDeletePress = async () => {
+    Alert.alert(
+      "Remove Tour",
+      "Are you sure you want to delete this tour from your saved list?",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await removeTour(tour.id);
+              navigation.goBack(); // go back to refresh the list
+            } catch (err) {
+              console.error("Error removing tour:", err);
+            }
+          },
+        },
+      ]
+    );
   };
 
   return (
     <ScrollView style={styles.container}>
+      {/* Tour Thumbnail */}
       <Image source={{ uri: tour.thumbnailUrl }} style={styles.image} resizeMode="cover" />
 
+      {/* Title */}
       <Text style={styles.title}>{tour.title}</Text>
 
+      {/* Info + Actions */}
       <View style={styles.infoRow}>
         <View style={styles.leftInfo}>
-          {/* Show rating only if it exists */}
-          {(tour.rating !== null && tour.rating !== undefined) && (
+          {tour.rating !== null && tour.rating !== undefined && (
             <Text style={styles.rating}>
               {Number(tour.rating).toFixed(1)} ⭐ ({tour.reviews ?? 0} reviews)
             </Text>
           )}
-
-          {/* Show city only if it exists */}
           {tour.country && <Text style={styles.city}>{tour.country}</Text>}
         </View>
 
-        <TouchableOpacity style={styles.buyButton} onPress={handleBuyPress}>
-          <Text style={styles.buyText}>
-            {user.role === 'tourist'
-              ? currentSource === "library" ? 'Save Tour' : 'Play Tour'
-              : 'Edit tour'}
-          </Text>
-        </TouchableOpacity>
+        <View style={styles.actions}>
+          <TouchableOpacity style={styles.actionButton} onPress={handleSaveOrPlayPress}>
+            <Text style={styles.actionText}>
+              {user.role === "tourist"
+                ? currentSource === "library"
+                  ? "Save Tour"
+                  : "Play Tour"
+                : "Edit Tour"}
+            </Text>
+          </TouchableOpacity>
+
+          {currentSource === "owned" && (
+            <TouchableOpacity style={[styles.actionButton, styles.deleteButton]} onPress={handleDeletePress}>
+              <Text style={styles.actionText}>Delete</Text>
+            </TouchableOpacity>
+          )}
+        </View>
       </View>
 
-      {tour.description && (
-        <Text style={styles.description}>{tour.description}</Text>
-      )}
+      {/* Description */}
+      {tour.description && <Text style={styles.description}>{tour.description}</Text>}
     </ScrollView>
   );
 }
@@ -60,11 +93,13 @@ export default function TourDetailScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f2f2f7",
+    backgroundColor: "#fafafa",
   },
   image: {
     width: "100%",
     height: 280,
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
   },
   title: {
     fontSize: 28,
@@ -86,7 +121,7 @@ const styles = StyleSheet.create({
   },
   rating: {
     fontSize: 16,
-    color: "#555",
+    color: "#444",
     fontWeight: "600",
     marginBottom: 6,
   },
@@ -94,24 +129,32 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#777",
   },
-  buyButton: {
-    backgroundColor: "#b05454",
-    paddingVertical: 10,
-    paddingHorizontal: 18,
-    borderRadius: 12,
-    shadowColor: "#b05454",
-    shadowOpacity: 0.4,
-    shadowRadius: 6,
-    shadowOffset: { width: 0, height: 3 },
+  actions: {
+    flexDirection: "row",
+    gap: 10,
   },
-  buyText: {
+  actionButton: {
+    backgroundColor: "#4a90e2",
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 12,
+    shadowColor: "#4a90e2",
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 2 },
+  },
+  actionText: {
     color: "#fff",
     fontWeight: "700",
     fontSize: 14,
   },
+  deleteButton: {
+    backgroundColor: "#e94f37",
+    shadowColor: "#e94f37",
+  },
   description: {
     fontSize: 15,
-    color: "#555",
+    color: "#444",
     lineHeight: 24,
     marginHorizontal: 20,
     marginBottom: 40,

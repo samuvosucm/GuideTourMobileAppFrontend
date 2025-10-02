@@ -41,3 +41,27 @@ export async function uploadSingleMedia(fileUri) {
 
   return json.secure_url; // the hosted file URL
 }
+
+export async function uploadMultipleMedia(fileUris = []) {
+  // Returns an array of uploaded URLs
+  const uploadedUrls = await Promise.all(
+    fileUris.map(async (uri) => {
+      if (uri.startsWith('http')) return uri; // already uploaded
+      return await uploadSingleMedia(uri);
+    })
+  );
+  return uploadedUrls;
+}
+
+
+export function getCloudinaryUrl(pathOrUrl) {
+  if (!pathOrUrl) return null;
+
+  if (pathOrUrl.startsWith('http')) return pathOrUrl;
+
+  return `https://res.cloudinary.com/drllaq8do/${pathOrUrl}`;
+}
+
+export function getCloudinaryUrls(urls = []) {
+  return urls.map(getCloudinaryUrl);
+}

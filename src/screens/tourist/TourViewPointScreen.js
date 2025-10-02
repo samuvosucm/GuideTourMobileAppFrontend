@@ -1,4 +1,4 @@
-import React, { useState, useRef, useMemo } from 'react';
+import React, { useState, useRef, useMemo, useEffect } from 'react';
 import {
   View,
   Text,
@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   Dimensions,
   Platform,
+  ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRoute } from '@react-navigation/native';
@@ -14,19 +15,54 @@ import BottomSheet, { BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import { Ionicons } from '@expo/vector-icons';
 import { Video } from 'expo-av';
 import MapView, { Marker } from 'react-native-maps';
+import { getTourLocations } from '../../services/touristService';
+import LocationDTO from "../../dto/LocationDTO"
+import TourMap from '../../utils/components/TourMap';
 
 export default function TourViewPointScreen() {
   const route = useRoute();
+  const { tour } = route.params;
 
-  const points =
-    route?.params?.points ?? (route?.params?.point ? [route.params.point] : SAMPLE_POINTS);
-
+  const [points, setPoints] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const point = points?.[currentIndex];
-  const [visibleMedia, setVisibleMedia] = useState(null); // null | 'image' | 'video' | 'audio'
+  const [visibleMedia, setVisibleMedia] = useState(null); 
 
+  const point = points[currentIndex];
   const bottomSheetRef = useRef(null);
   const snapPoints = useMemo(() => ['15%', '85%'], []);
+
+
+useEffect(() => {
+  const fetchLocations = async () => {
+    try {
+      const locations = await getTourLocations(tour.id);
+
+      const formatted = locations.map(loc => new LocationDTO(loc));
+
+      const points = formatted.map(loc => ({
+        name: loc.name,
+        subtitle: loc.category ?? '',
+        description: loc.description,
+        image: loc.images[0] ?? null,
+        images: loc.images,
+        video: loc.videos[0] ?? null,
+        audio: loc.audios[0] ?? null,
+        latitude: loc.latitude,
+        longitude: loc.longitude,
+      }));
+
+      setPoints(points);
+    } catch (err) {
+      console.error("Error fetching locations:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchLocations();
+}, [tour.id]);
+
 
   const hasImages = Array.isArray(point?.images) ? point.images.length > 0 : !!point?.image;
   const hasVideo = !!point?.video;
@@ -55,27 +91,15 @@ export default function TourViewPointScreen() {
       : [];
 
     if (images.length === 0) return null;
-
     if (images.length === 1) {
-      return (
-        <Image
-          source={getImageSource(images[0])}
-          style={styles.mediaImageFull}
-          resizeMode="cover"
-        />
-      );
+      return <Image source={getImageSource(images[0])} style={styles.mediaImageFull} resizeMode="cover" />;
     }
 
     return (
       <View style={styles.galleryContainer}>
         <View style={{ flexDirection: 'row' }}>
           {images.map((it, i) => (
-            <Image
-              key={String(i)}
-              source={getImageSource(it)}
-              style={styles.galleryImage}
-              resizeMode="cover"
-            />
+            <Image key={String(i)} source={getImageSource(it)} style={styles.galleryImage} resizeMode="cover" />
           ))}
         </View>
       </View>
@@ -85,7 +109,6 @@ export default function TourViewPointScreen() {
   const renderVideoOrAudio = () => {
     const source = visibleMedia === 'video' ? point?.video : point?.audio;
     if (!source) return null;
-
     return (
       <View style={styles.mediaVideoWrap}>
         <Video
@@ -99,45 +122,34 @@ export default function TourViewPointScreen() {
     );
   };
 
+  if (loading) {
+    return (
+      <SafeAreaView style={[styles.safeArea, styles.center]}>
+        <ActivityIndicator size="large" color="#4a90e2" />
+      </SafeAreaView>
+    );
+  }
+
   if (!points || points.length === 0) {
     return (
       <SafeAreaView style={[styles.safeArea, styles.center]}>
-        <Text>No hay puntos para mostrar.</Text>
+        <Text>No points available for this tour.</Text>
       </SafeAreaView>
     );
   }
 
   return (
     <View style={{ flex: 1 }}>
-      {/* Map */}
-      <MapView
-        style={styles.mapContainer}
-        initialRegion={{
-          latitude: point?.latitude ?? 46.948,
-          longitude: point?.longitude ?? 7.447,
-          latitudeDelta: 0.05,
-          longitudeDelta: 0.05,
-        }}
-      >
-        {points.map((p, i) => (
-          <Marker
-            key={i}
-            coordinate={{
-              latitude: p.latitude ?? 46.948,
-              longitude: p.longitude ?? 7.447,
-            }}
-            title={p.name}
-            description={p.subtitle}
-          />
-        ))}
-      </MapView>
+    <TourMap
+      points={points}
+      currentIndex={currentIndex}
+      onSelectPoint={(i) => {
+      setCurrentIndex(i);
+      bottomSheetRef.current?.snapToIndex(1);
+    }}
+/>
 
-      <BottomSheet
-        ref={bottomSheetRef}
-        index={1}
-        snapPoints={snapPoints}
-        enablePanDownToClose={false}
-      >
+      <BottomSheet ref={bottomSheetRef} index={1} snapPoints={snapPoints} enablePanDownToClose={false}>
         <BottomSheetScrollView contentContainerStyle={styles.sheetContent}>
           <View style={styles.headerRow}>
             {point?.image ? (
@@ -149,8 +161,12 @@ export default function TourViewPointScreen() {
             )}
 
             <View style={styles.titleColumn}>
-              <Text style={styles.title} numberOfLines={2}>{point?.name ?? 'Sin nombre'}</Text>
-              <Text style={styles.subtitle} numberOfLines={1}>{point?.subtitle ?? ''}</Text>
+              <Text style={styles.title} numberOfLines={2}>
+                {point?.name ?? 'No Name'}
+              </Text>
+              <Text style={styles.subtitle} numberOfLines={1}>
+                {point?.subtitle ?? ''}
+              </Text>
             </View>
           </View>
 
@@ -198,17 +214,39 @@ export default function TourViewPointScreen() {
               onPress={() => switchToIndex(currentIndex - 1)}
               disabled={currentIndex === 0}
             >
-              <Ionicons name="chevron-back" size={18} color={currentIndex === 0 ? '#bbb' : '#000'} />
-              <Text style={[styles.navButtonText, currentIndex === 0 && styles.navButtonTextDisabled]}>Previous</Text>
+              <Ionicons
+                name="chevron-back"
+                size={18}
+                color={currentIndex === 0 ? '#bbb' : '#000'}
+              />
+              <Text
+                style={[styles.navButtonText, currentIndex === 0 && styles.navButtonTextDisabled]}
+              >
+                Previous
+              </Text>
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={[styles.navButton, currentIndex === points.length - 1 && styles.navButtonDisabled]}
+              style={[
+                styles.navButton,
+                currentIndex === points.length - 1 && styles.navButtonDisabled,
+              ]}
               onPress={() => switchToIndex(currentIndex + 1)}
               disabled={currentIndex === points.length - 1}
             >
-              <Text style={[styles.navButtonText, currentIndex === points.length - 1 && styles.navButtonTextDisabled]}>Next</Text>
-              <Ionicons name="chevron-forward" size={18} color={currentIndex === points.length - 1 ? '#bbb' : '#000'} />
+              <Text
+                style={[
+                  styles.navButtonText,
+                  currentIndex === points.length - 1 && styles.navButtonTextDisabled,
+                ]}
+              >
+                Next
+              </Text>
+              <Ionicons
+                name="chevron-forward"
+                size={18}
+                color={currentIndex === points.length - 1 ? '#bbb' : '#000'}
+              />
             </TouchableOpacity>
           </View>
         </BottomSheetScrollView>
@@ -217,42 +255,12 @@ export default function TourViewPointScreen() {
   );
 }
 
-// Sample points
-const SAMPLE_POINTS = [
-  {
-    name: 'Parliament Building',
-    subtitle: 'Budapest · Danube riverside',
-    description: 'A historic and iconic building completed in the late 19th century.',
-    image: 'https://images.unsplash.com/photo-1549880338-65ddcdfd017b?w=800',
-    images: [
-      'https://images.unsplash.com/photo-1549880338-65ddcdfd017b?w=800',
-      'https://images.unsplash.com/photo-1505765053744-8b03b6f9f1d4?w=800',
-    ],
-    video: 'https://www.w3schools.com/html/mov_bbb.mp4',
-    audio: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
-    latitude: 47.498, // example
-    longitude: 19.039,
-  },
-  {
-    name: 'Chain Bridge',
-    subtitle: 'Budapest · Danube',
-    description: 'The famous suspension bridge connecting Buda and Pest.',
-    image: 'https://images.unsplash.com/photo-1505765053744-8b03b6f9f1d4?w=800',
-    images: [],
-    video: null,
-    audio: null,
-    latitude: 47.498,
-    longitude: 19.043,
-  },
-];
-
 const { width } = Dimensions.get('window');
+
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: '#fff' },
   center: { justifyContent: 'center', alignItems: 'center' },
-
   mapContainer: { ...StyleSheet.absoluteFillObject },
-
   sheetContent: { padding: 20, paddingBottom: 40, flexGrow: 1 },
   headerRow: { flexDirection: 'row', alignItems: 'center' },
   avatar: { width: 86, height: 86, borderRadius: 43, backgroundColor: '#ddd', marginRight: 14 },

@@ -1,39 +1,41 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { View, Text, StyleSheet, FlatList } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView } from "react-native-safe-area-context"; 
 import SearchBar from "../../utils/components/searchBarComponent";
 import TourCardComponent from "../../utils/components/tourCardComponent";
 import { getAcquiredTours } from "../../services/touristService";
+import { useFocusEffect } from "@react-navigation/native";
 
 export default function TouristHomeScreen() {
 
   const [tours, setTours] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchTours = async () => {
-      try {
-        const data = await getAcquiredTours(); // fetch tours from your service
-        console.log(data)
-        setTours(data || []); // fallback to empty array
-      } catch (err) {
-        console.error("Error fetching tours:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const fetchTours = async () => {
+    try {
+      setLoading(true);
+      const data = await getAcquiredTours();
+      setTours(data || []);
+    } catch (err) {
+      console.error("Error fetching tours:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    fetchTours();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      fetchTours();
+    }, [])
+  );
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#f9f9f9' }}>
       <View style={styles.container}>
         <View style={styles.header}>
           <Text style={styles.title}>My Tours</Text>
-          <Text style={styles.subtitle}>Explore your created tours</Text>
+          <Text style={styles.subtitle}>Explore your saved tours</Text>
         </View>
-        <SearchBar/>
 
         <FlatList
           data={tours}

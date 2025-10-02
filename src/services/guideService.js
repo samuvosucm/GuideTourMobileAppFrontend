@@ -1,7 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { uploadSingleMedia } from "./cloudinaryService";
+import { uploadSingleMedia, uploadMultipleMedia } from "./cloudinaryService";
 
-const API_URL = "http://192.168.1.9:8080";
+const API_URL = "http://192.168.1.96:8080";
 
 export async function getMyTours() {
   try {
@@ -32,27 +32,36 @@ export async function getMyTours() {
 
 export async function createTour(tourData, thumbnailUri) {
   try {
-    const token = await AsyncStorage.getItem("token");
-    if (!token) throw new Error("No token found");
+    const token = await AsyncStorage.getItem('token');
+    if (!token) throw new Error('No token found');
 
-    let uploadedThumbnail = thumbnailUri
+    // Upload tour thumbnail if needed
+    let uploadedThumbnail = thumbnailUri;
     if (thumbnailUri && !thumbnailUri.startsWith('http')) {
-      uploadedThumbnail = await uploadSingleMedia(thumbnailUri)
+      uploadedThumbnail = await uploadSingleMedia(thumbnailUri);
     }
+
+    // Upload location media
+    const locationsWithUploadedMedia = [];
+    for (const loc of tourData.locations || []) {
+      const uploadedMedia = await uploadMultipleMedia(loc.media || []);
+      locationsWithUploadedMedia.push({
+        ...loc,
+        mediaUrls: uploadedMedia,
+      });
+    }
+
     const payload = {
       ...tourData,
       thumbnail: uploadedThumbnail,
-      locations: (tourData.locations || []).map(loc => ({
-        ...loc,
-        media: loc.media || [],
-      })),
+      locations: locationsWithUploadedMedia,
     };
 
     const response = await fetch(`${API_URL}/api/tours/save`, {
-      method: "POST",
+      method: 'POST',
       headers: {
         Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify(payload),
     });
@@ -64,7 +73,7 @@ export async function createTour(tourData, thumbnailUri) {
 
     return await response.json();
   } catch (error) {
-    console.error("Error creating tour:", error);
+    console.error('Error creating tour:', error);
     throw error;
   }
 }

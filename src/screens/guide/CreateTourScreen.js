@@ -44,6 +44,7 @@ export default function CreateTourScreen() {
         text: "Gallery",
         onPress: async () => {
           const result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: "All",
             allowsEditing: true,
             aspect: [4, 3],
             quality: 1,
